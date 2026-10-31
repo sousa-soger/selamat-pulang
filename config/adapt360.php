@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'dashboard' => ['Home', 'Dashboard', 'layout-dashboard'],
+    'next' => ['Home', 'My next steps', 'list-checks'],
+    'calendar' => ['Home', 'Compliance calendar', 'calendar-days'],
+    'workplace' => ['Build my OSH system', 'Workplace profile', 'building-2'],
+    'legal' => ['Build my OSH system', 'Legal register', 'book-open'],
+    'roles' => ['Build my OSH system', 'Policy & roles', 'badge-check'],
+    'committee' => ['Build my OSH system', 'Safety committee', 'users-round'],
+    'adapt' => ['Manage risk', 'Adapt Engine', 'workflow'],
+    'hirarc' => ['Manage risk', 'JMS & HIRARC', 'scan-line'],
+    'hra' => ['Manage risk', 'Health risk assessments', 'heart-pulse'],
+    'capa' => ['Manage risk', 'Corrective actions', 'circle-check'],
+    'people' => ['People & assets', 'Workers & passports', 'contact-round'],
+    'equipment' => ['People & assets', 'Equipment', 'wrench'],
+    'chemicals' => ['People & assets', 'Chemicals', 'flask-conical'],
+    'training' => ['People & assets', 'Training & toolbox', 'graduation-cap'],
+    'ptw' => ['Control work', 'Permit to work', 'file-check-2'],
+    'fives' => ['Control work', '5S + safety', 'list-filter'],
+    'emergency' => ['Control work', 'Emergency & drills', 'siren'],
+    'incidents' => ['Control work', 'Incidents', 'triangle-alert'],
+    'workerportal' => ['Workers & excellence', 'Worker portal / QR', 'qr-code'],
+    'solve' => ['Workers & excellence', 'OSHWA & SOLVE', 'clipboard-check'],
+    'excel' => ['Workers & excellence', 'ISO & excellence', 'award'],
+    'mentor' => ['Workers & excellence', 'Fresh-grad mentor', 'lightbulb'],
+];
