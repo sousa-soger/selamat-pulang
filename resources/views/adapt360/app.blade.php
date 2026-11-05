@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8"><link rel="icon" type="image/x-icon" href="{{ asset('adapt360logo-transparent.ico') }}"><meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#4f46e5">
     <title>{{ $screens[$screen][1] }} | Adapt360</title>
@@ -10,30 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/adapt360.js'])
 </head>
-<body data-screen="{{ $screen }}">
-<a href="#main-content" class="skip-link">Skip to content</a>
+<body data-screen="{{ $screen }}" data-user-id="{{ auth()->id() }}" data-organization-id="{{ $organization?->id }}" data-organization-name="{{ $organization?->name }}" data-workspace-version="{{ $organization?->workspace_version ?? 0 }}">
+<script type="application/json" id="workspace-data">{!! json_encode(json_decode($organization?->workspace_data ?? '{}'), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script><a href="#main-content" class="skip-link">Skip to content</a>
 <div class="app-shell">
-    <aside class="sidebar" id="sidebar">
-        <a href="/" class="brand adapt-brand" data-section="dashboard"><img src="/images/adapt360-logo.webp" alt="Adapt360 — Adaptive OSH Management Platform for Malaysian SME"></a>
-        <button class="workplace-switch" onclick="openCompanyEditor()"><span class="workplace-symbol">ME</span><span><strong id="sidebarCompany">Maju Engineering</strong><small id="sidebarSite">Miri, Sarawak</small></span><x-icon name="chevrons-up-down" size="14" /></button>
-        <nav aria-label="Main navigation">
-        @foreach(collect($screens)->pluck(0)->unique() as $group)
-            <p class="nav-group">{{ $group }}</p>
-            @foreach($screens as $key => [$category, $title, $icon])
-                @if($category === $group)
-                <a href="{{ $key === 'dashboard' ? '/' : '/'.$key }}" data-section="{{ $key }}" @if($screen === $key) aria-current="page" @endif class="nav-link"><x-icon :name="$icon" /><span>{{ $title }}</span></a>
-                @endif
-            @endforeach
-        @endforeach
-        </nav>
-        <div class="sidebar-bottom"><a class="sidebar-help" href="/mentor" data-section="mentor"><x-icon name="circle-help" /><span>Help & guidance</span><x-icon name="arrow-up-right" size="14" /></a><div class="account"><span class="avatar teal">AR</span><span><strong>Aina Rahman</strong><small>OSH coordinator</small></span></div></div>
-    </aside>
+    @include('shared.sidebar')
     <div class="workspace">
-        <header class="topbar"><div class="breadcrumb"><button class="icon-button menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar" data-menu><x-icon name="menu" /></button><span>Workspace</span><x-icon name="chevron-right" size="14" /><strong id="pageTitle">{{ $screens[$screen][1] }}</strong></div><div class="topbar-actions"><span class="preview-label"><span></span>Browser preview</span><select id="uiLang" aria-label="Interface language"><option value="en">EN</option><option value="ms">BM</option></select><button class="button primary" onclick="openModal('changeModal')"><x-icon name="plus" size="14" />Report change</button></div></header>
-        <main id="main-content" class="main-content adapt-content">
-            <p id="companyLine" class="workspace-context"></p>
+        <header class="topbar"><div class="breadcrumb"><button class="icon-button menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar" data-menu><x-icon name="menu" /></button><a href="/" data-section="dashboard">Home</a><span id="workspaceTrail"></span><x-icon name="chevron-right" size="14" /><strong id="pageTitle">{{ $screens[$screen][1] }}</strong></div><div class="topbar-actions"><span class="preview-label"><span></span>Browser preview</span><select id="uiLang" aria-label="Interface language"><option value="en">EN</option><option value="ms">BM</option></select><button id="organizationChange" class="button primary" onclick="openModal('changeModal')" @if(in_array($screen, ['dashboard', 'personal', 'workerportal', 'mentor'])) hidden @endif><x-icon name="plus" size="14" />Report change</button></div></header>
+        <main id="main-content" class="main-content adapt-content">@if(!$organization)<div class="callout"><h2>Select an organization</h2><p>Choose or create an organization to save workplace records.</p><a href="{{ route('account') }}">Your organizations →</a></div>@endif
+            <p id="companyLine" class="workspace-context" @if(in_array($screen, ['dashboard', 'personal', 'workerportal', 'mentor'])) hidden @endif></p>
             @foreach($screens as $key => $metadata)
-                <section class="adapt-screen" id="{{ $key }}" aria-label="{{ $metadata[1] }}" @if($key !== $screen) hidden @endif>
+                <section class="adapt-screen" data-workspace="{{ in_array($key, ['personal', 'workerportal', 'mentor']) ? 'Personal' : ($key === 'dashboard' ? 'Home' : 'Organization') }}" id="{{ $key }}" aria-label="{{ $metadata[1] }}" @if($key !== $screen) hidden @endif>
                     @include('adapt360.pages.'.$key)
                 </section>
             @endforeach

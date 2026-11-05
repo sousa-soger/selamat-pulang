@@ -1,0 +1,119 @@
+/* Auralis: white canvas, charcoal emphasis, indigo actions, cyan atmosphere. */
+.accounts{--ink:#111827;--muted:#4b5563;--line:#e5e7eb;--primary:#4f46e5;--primary-strong:#4338ca;--accent:#06b6d4;--surface:#1c1c1e;background:#fff;color:var(--ink);font:15px/1.6 "Geist",Arial,sans-serif;min-height:100dvh;-webkit-font-smoothing:antialiased}
+.accounts *{box-sizing:border-box}
+.accounts a{color:var(--primary)}
+.account-header{max-width:1440px;margin:auto;padding:22px 48px;display:flex;justify-content:space-between;align-items:center;gap:24px;border-bottom:1px solid var(--line)}
+.account-header img{width:154px;height:auto}
+.account-header nav{display:flex;gap:28px;align-items:center;font-size:13px;font-weight:500;flex-wrap:wrap}
+.account-header nav>a{color:var(--muted)}
+.account-header nav>a:hover{color:var(--primary)}
+.account-header nav>a:last-child{color:var(--primary)}
+.account-main{max-width:1344px;margin:0 auto;padding:48px;min-height:76vh;background:radial-gradient(ellipse at 95% 0,rgba(6,182,212,.045),transparent 50%)}
+.account-footer{max-width:1248px;margin:0 auto;padding:24px 0;color:#6b7280;border-top:1px solid var(--line);font-size:11px;font-family:"JetBrains Mono",monospace}
+.auth-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:64px;align-items:center;min-height:620px}
+.auth-intro{isolation:isolate;overflow:hidden;position:relative;align-self:stretch;display:flex;flex-direction:column;justify-content:center;background:var(--surface);border:1px solid #34343a;border-radius:8px;padding:52px 40px;color:#f4f4f5}
+.auth-intro:before{content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;background:radial-gradient(ellipse at 100% 0,rgba(6,182,212,.17),transparent 45%),radial-gradient(ellipse at 0 90%,rgba(79,70,229,.25),transparent 55%)}
+.auth-intro:after{content:"";position:absolute;z-index:-1;width:440px;height:440px;right:-290px;top:110px;border:1px solid rgba(165,180,252,.17);border-radius:50%;box-shadow:0 0 0 48px rgba(165,180,252,.025),0 0 0 96px rgba(165,180,252,.02);pointer-events:none}
+.eyebrow{font:500 10px/1.5 "JetBrains Mono",monospace;letter-spacing:1.4px;color:#6b7280}
+.auth-intro .eyebrow{color:#a5b4fc}
+.accounts h1{font-size:48px;line-height:1.08;font-weight:500;letter-spacing:0;margin:22px 0}
+.auth-intro h1{font-size:clamp(32px,3.4vw,52px);line-height:1.12}
+.auth-intro h1 span{color:#b8b9d5}
+.accounts h2{font-size:25px;line-height:1.3;font-weight:500;letter-spacing:0;margin:0 0 12px}
+.accounts h3{font-size:16px;font-weight:600;margin:0 0 10px}
+.auth-intro>p{font-size:15px;color:#bcbcc8;margin:0 0 30px}
+.intro-detail{display:flex;gap:18px;margin-top:24px;max-width:400px}
+.intro-detail>span{color:#818cf8;font:11px/1.5 "JetBrains Mono",monospace;padding-top:3px}
+.intro-detail strong{font-size:14px;font-weight:500}
+.intro-detail p{font-size:12px;line-height:1.7;color:#a1a1b0;margin:5px 0 0}
+.panel{background:#fff;border:1px solid var(--line);padding:28px;border-radius:8px;box-shadow:0 1px 2px rgba(17,24,39,.025);min-width:0}
+.auth-form.panel{padding:24px 0;border:0;border-radius:0;box-shadow:none}
+.auth-form h2{margin-top:12px;font-size:30px}
+.auth-form>.muted{font-size:14px;max-width:360px}
+.accounts .muted{color:var(--muted)}
+.accounts p{margin-bottom:12px}
+.accounts label:not(.check){display:block;font-weight:500;font-size:12px;margin:20px 0 8px}
+.accounts input:not([type=checkbox]),.accounts textarea{display:block;width:100%;padding:12px 14px;border:1px solid #d1d5db;border-radius:8px;background:#f9fafb;color:var(--ink);min-height:46px;font:inherit;transition:border-color .18s,box-shadow .18s,background .18s}
+.accounts input:not([type=checkbox]):focus,.accounts textarea:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px #eef2ff;outline:none}
+.accounts input[type=file]{font-size:12px}
+.accounts textarea{min-height:82px;resize:vertical}
+.accounts small{display:block;font-size:12px;margin-top:6px}
+.account-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:44px;padding:11px 18px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:500;margin-top:20px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
+.account-button.primary{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 3px 8px rgba(79,70,229,.12)}
+.account-button:hover{background:#f8f9fb;border-color:#a5b4fc;transform:translateY(-1px)}
+.account-button.primary:hover{background:var(--primary-strong);border-color:var(--primary-strong);box-shadow:0 5px 14px rgba(79,70,229,.2)}
+.account-button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.wide,.google-button{width:100%}
+.accounts .google-button{color:var(--ink);margin-top:25px}
+.google-button span{font:600 19px "Geist",Arial}
+.divider{display:flex;align-items:center;gap:15px;color:#6b7280;font:10px "JetBrains Mono",monospace;margin:26px 0 6px}
+.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}
+.form-between{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin-top:16px}
+.check{display:flex;align-items:center;gap:9px;font-size:12px;margin-top:18px}
+.form-between .check{margin:0}
+.check input{accent-color:var(--primary);width:15px;height:15px}
+.auth-switch{font-size:12px;text-align:center;margin-top:24px;color:var(--muted)}
+.auth-switch a{font-weight:500}
+.text-button{padding:0;border:0;background:none;font:inherit;color:var(--primary);cursor:pointer}
+.page-heading{margin-bottom:36px}
+.page-heading h1{font-size:36px;margin:14px 0}
+.account-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.section-heading{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.status{display:inline-block;border:1px solid #c7d2fe;border-radius:999px;background:#eef2ff;color:#4338ca;padding:4px 10px;font:10px/1.6 "JetBrains Mono",monospace;text-transform:capitalize;white-space:nowrap}
+.list-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:18px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.list-row small{color:var(--muted)}
+.accounts hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.empty-state{padding:24px 0;color:var(--muted);font-size:13px}
+.notice{padding:18px 22px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;margin-bottom:24px;font-size:14px;color:#3730a3}
+.notice.success{background:#ecfeff;border-color:#a5f3fc;color:#155e75}
+.notice.error{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+.notice ul{margin:10px 0 0;padding-left:20px;list-style:disc}
+.notice p{margin:6px 0}
+.review-row{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:24px 0;border-top:1px solid var(--line)}
+.button-row{display:flex;gap:12px;flex-wrap:wrap}
+.admin-create{margin:24px 0}
+.accounts :focus-visible{outline:2px solid #6d67e8;outline-offset:3px}
+.accounts ::selection{background:#ddd9ff;color:#1e1b4b}
+@keyframes account-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:no-preference){.auth-intro,.auth-form{animation:account-enter .45s ease-out both}.auth-form{animation-delay:.06s}}
+@media(max-width:1100px){.account-main{padding:32px}.auth-layout{gap:36px;grid-template-columns:minmax(0,1fr) minmax(340px,1fr)}.auth-intro{padding:36px 28px}.auth-intro h1{font-size:36px}.account-footer{margin:0 32px}}
+@media(max-width:800px){.account-header{padding:20px 24px}.auth-layout{grid-template-columns:1fr;gap:28px;min-height:auto;max-width:480px;margin:auto}.auth-intro{padding:28px;min-height:200px}.auth-intro h1{font-size:32px;margin:15px 0}.auth-intro>p{margin:0;font-size:13px}.intro-detail{display:none}.auth-form.panel{padding:0 4px 12px}.account-grid,.review-row{grid-template-columns:1fr}.account-main{padding:28px 24px}.account-header img{width:125px}.account-header nav{gap:14px;font-size:12px}.page-heading h1{font-size:28px}.panel{padding:24px}.account-footer{margin:0 24px}.section-heading{align-items:flex-start;flex-wrap:wrap}}
+@media(max-width:420px){.account-header{padding:18px}.account-header img{width:105px}.account-header nav{gap:12px;font-size:11px}.account-main{padding:24px 18px}.auth-intro{padding:24px}.auth-intro h1{font-size:28px}.account-footer{margin:0 18px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.account-button,.accounts input,.accounts textarea{transition:none}.account-button:hover{transform:none}}
+
+
+.account-sidebar{float:left;width:210px;padding:32px 24px;display:flex;flex-direction:column;gap:16px;background:#1c1c1e;color:#f4f4f5;min-height:80vh}.account-sidebar a{color:#c7d2fe;font-size:13px}.account-sidebar strong{margin-top:24px}.account-sidebar~.account-main{margin-left:210px}@media(max-width:800px){.account-sidebar{float:none;width:auto;min-height:0;flex-direction:row;flex-wrap:wrap;padding:18px}.account-sidebar~.account-main{margin-left:0}}
+
+/* Account pages use the same application shell and sidebar as the workspace. */
+.account-workspace .account-main{max-width:1300px;width:100%;padding:36px;margin:0 auto;min-height:calc(100dvh - 150px)}
+.account-workspace .account-footer{margin:0 36px;max-width:none}
+.account-workspace .sidebar a{color:#c2c2ce}
+.account-workspace .sidebar a[aria-current=page]{color:#fff;background:#312e5c}
+.account-workspace .sidebar .account strong{color:#f4f4f5}
+.account-workspace .sidebar .account small{color:#bcbcc8}
+.account-workspace .sidebar .avatar{background:#312e5c;color:#c7d2fe}
+.account-workspace .sidebar .nav-group{margin-bottom:0}
+.account-workspace .sidebar .workplace-switch{color:#f4f4f5}
+.account-workspace .topbar .text-button{font-size:13px}
+.special-access summary{gap:10px}
+.member-search{position:relative;margin-top:8px}
+.member-search-field{position:relative}
+.member-search-field>svg{position:absolute;left:14px;top:15px;width:17px;height:17px;color:#6b7280;pointer-events:none}
+.accounts .member-search-field input{padding-left:42px;background:#fff}
+.member-results{position:absolute;left:0;right:0;top:52px;max-height:300px;overflow:auto;z-index:20;background:#fff;border:1px solid #dfe3ed;border-radius:10px;padding:6px;box-shadow:0 16px 36px -12px #11182733}
+.member-result{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:6px;cursor:pointer;color:#111827}
+.member-result:hover,.member-result[aria-selected=true]{background:#eef2ff}
+.member-result-avatar{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:50%;background:#eef2ff;color:#4f46e5;font-weight:600}
+.member-result-copy{min-width:0;overflow-wrap:anywhere}
+.member-result-copy strong{display:block;font-size:13px;font-weight:600}
+.accounts .member-result-copy small{margin:2px 0 0;font-size:12px;color:#6b7280}
+.accounts .member-result-copy .member-result-id{font:10px/1.6 'JetBrains Mono',monospace;color:#4338ca}
+.member-search-status{font-size:12px;color:#6b7280;margin:9px 0 0}
+.member-selected{margin-top:12px;padding:12px 14px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;overflow-wrap:anywhere}
+.member-selected strong,.member-selected span{display:block;font-size:13px}
+.member-selected span{font-size:12px;color:#4b5563;margin-top:3px}
+@media(max-width:800px){.account-workspace .account-main{padding:24px 18px}.account-workspace .account-footer{margin:0 18px}}
+
+/* Use the same full workspace wash as the main application pages. */
+.account-workspace .account-main { background: transparent; position: relative; z-index: 1; }
+.account-workspace .account-footer { position: relative; z-index: 1; }

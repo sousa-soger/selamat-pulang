@@ -13,14 +13,35 @@ window.adaptNavigate = (id, push = true) => {
         else link.removeAttribute('aria-current');
     });
     document.getElementById('pageTitle').textContent = panel.getAttribute('aria-label');
+    const workspace = panel.dataset.workspace;
+    const trail = document.getElementById('workspaceTrail');
+    trail.replaceChildren();
+    if (workspace !== 'Home') {
+        const parent = document.createElement('a');
+        parent.href = workspace === 'Personal' ? '/personal' : '/organization';
+        parent.dataset.section = workspace === 'Personal' ? 'personal' : 'organization';
+        parent.textContent = workspace;
+        trail.append(' / ', parent);
+    }
+    document.getElementById('organizationChange').hidden = workspace !== 'Organization';
+    document.getElementById('companyLine').hidden = workspace !== 'Organization';
+    document.querySelectorAll('.nav-section').forEach(group => {
+        group.open = !!group.querySelector('[aria-current="page"]');
+    });
+    document.body.dataset.screen = id;
     document.title = `${panel.getAttribute('aria-label')} | Adapt360`;
     if (push) history.pushState({screen: id}, '', id === 'dashboard' ? '/' : `/${id}`);
     closeMenu();
+    if (push) {
+        const heading = panel.querySelector('h1');
+        heading?.setAttribute('tabindex', '-1');
+        heading?.focus({preventScroll: true});
+    }
     window.scrollTo({top:0, behavior:'instant'});
 };
 document.addEventListener('click', event => {
     const link = event.target.closest('a[data-section]');
-    if (link && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+    if (link && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button === 0) {
         event.preventDefault(); window.adaptNavigate(link.dataset.section);
     }
 });

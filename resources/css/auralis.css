@@ -285,7 +285,7 @@ body {
 }
 
 /* ---------- Metric strip ---------- */
-.adapt-content #dashboard > .g4 {
+.adapt-content #organization > .g4 {
     gap: 0;
     border-block: 1px solid var(--line);
     margin-bottom: 22px;
@@ -304,7 +304,7 @@ body {
 .adapt-content .metric .metric-link,
 .adapt-content .metric .inline-metric-btn { margin-top: auto; align-self: flex-start; }
 .adapt-content .metric + .metric,
-.adapt-content #dashboard > .g4 > .metric + .metric { border-left: 1px solid var(--line); }
+.adapt-content #organization > .g4 > .metric + .metric { border-left: 1px solid var(--line); }
 .adapt-content .metric .label {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -833,11 +833,11 @@ body {
     .adapt-content #dashboard .hero :is(h1, h3) { font-size: 40px; }
     .adapt-content .hero :is(h1, h3) { font-size: 36px; }
     .adapt-content .metric .value { font-size: 32px; }
-    .adapt-content #dashboard > .g4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .adapt-content #dashboard > .g4 > .metric + .metric { border-left: 1px solid var(--line); }
-    .adapt-content #dashboard > .g4 > .metric:nth-child(3n + 1) { border-left: 0; }
-    .adapt-content #dashboard > .g4 > .metric { border-bottom: 1px solid var(--line); }
-    .adapt-content #dashboard > .g4 > .metric:nth-last-child(-n + 2) { border-bottom: 0; }
+    .adapt-content #organization > .g4 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .adapt-content #organization > .g4 > .metric + .metric { border-left: 1px solid var(--line); }
+    .adapt-content #organization > .g4 > .metric:nth-child(3n + 1) { border-left: 0; }
+    .adapt-content #organization > .g4 > .metric { border-bottom: 1px solid var(--line); }
+    .adapt-content #organization > .g4 > .metric:nth-last-child(-n + 2) { border-bottom: 0; }
     .next-grid { grid-template-columns: 1fr; }
     .next-board .list { max-height: none; overflow: visible; }
     .spotlight .score-value { font-size: 38px; }
@@ -872,11 +872,11 @@ body {
     .adapt-content .metric .value { font-size: 27px; margin: 8px 0 4px; }
     .adapt-content .metric .sub { font-size: 12.5px; }
     .metric-link, .inline-metric-btn { font-size: 12.5px; }
-    .adapt-content #dashboard > .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .adapt-content #dashboard > .g4 > .metric { border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-    .adapt-content #dashboard > .g4 > .metric:nth-child(2n + 1) { border-left: 0; }
-    .adapt-content #dashboard > .g4 > .metric:last-child { border-bottom: 0; }
-    .adapt-content #dashboard > .g4 > .metric:nth-last-child(2) { border-bottom: 0; }
+    .adapt-content #organization > .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .adapt-content #organization > .g4 > .metric { border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .adapt-content #organization > .g4 > .metric:nth-child(2n + 1) { border-left: 0; }
+    .adapt-content #organization > .g4 > .metric:last-child { border-bottom: 0; }
+    .adapt-content #organization > .g4 > .metric:nth-last-child(2) { border-bottom: 0; }
     .adapt-content .grid { gap: 16px; }
     .adapt-content th { padding: 10px 12px; }
     .adapt-content td { padding: 12px; }
@@ -917,3 +917,22 @@ body {
     .adapt-content th, .adapt-content td { color: #111 !important; }
     .adapt-content .card { break-inside: avoid; }
 }
+
+/* Workspace hierarchy reuses the existing visual language and motion. */
+[hidden] { display: none !important; }
+.nav-section > summary { cursor: pointer; list-style: none; }
+.nav-section > summary::after { content: '+'; margin-left: auto; }
+.nav-section[open] > summary::after { content: '−'; }
+.nav-section > summary::-webkit-details-marker { display: none; }
+.nav-section > a { margin-left: 10px; }
+.entry-paths > article { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.entry-paths > article .btn { margin-top: auto; }
+.getting-started { margin-block: 24px; display: grid; gap: 12px; justify-items: start; }
+.workspace-details { margin-block: 24px; }
+.workspace-details > summary { cursor: pointer; }
+.disclosure-content { padding-top: 24px; }
+.breadcrumb a { color: inherit; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+body[data-screen="dashboard"] .breadcrumb > a,
+body[data-screen="dashboard"] .breadcrumb > svg { display: none; }
