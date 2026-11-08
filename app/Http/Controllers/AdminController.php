@@ -66,6 +66,7 @@ class AdminController extends Controller
         abort_unless($request->user()->isSuperAdmin(), 403);
         $data = $request->validate(['name' => 'required|string|max:160', 'owner_id' => 'required|exists:users,id', 'verification_status' => 'required|in:pending,verified,rejected', 'admin_provisioned' => 'required|boolean']);
         DB::transaction(function () use ($organization, $data) {
+            User::whereKey($data['owner_id'])->lockForUpdate()->firstOrFail()->assertAvailableForOrganization($organization->id);
             $organization->update($data);
             $organization->users()->syncWithoutDetaching([$data['owner_id']]);
         });
@@ -105,6 +106,7 @@ class AdminController extends Controller
             return back()->withErrors(['owner_email' => 'Create the owner’s profile first.']);
         }
         $organization = DB::transaction(function () use ($data, $owner, $request) {
+            User::whereKey($owner->id)->lockForUpdate()->firstOrFail()->assertAvailableForOrganization();
             $organization = Organization::create(['name' => $data['name'], 'owner_id' => $owner->id, 'admin_provisioned' => $request->boolean('admin_provisioned')]);
             $organization->users()->attach($owner->id);
 

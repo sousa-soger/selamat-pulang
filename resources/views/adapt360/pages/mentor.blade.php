@@ -1,11 +1,1 @@
-@verbatim
-
-<div class="hero"><div><h1>Learning &amp; guidance</h1><p>The worked example and micro-lesson automatically change every calendar day on this device. Practical guidance for newly appointed OSH personnel.</p></div></div>
-<div class="mentor-date-note" id="mentorDailyNote">Daily lesson schedule: curated educational content rotates automatically with your device’s calendar date. No internet, login or manual refresh is required; new laws and news are not fetched.</div>
-<div class="grid g3">
-<div class="card"><h4>Why am I doing this?</h4><p id="mentorWhy">A legal register prevents the OSH coordinator from treating every regulation as equally applicable. It turns the workplace profile into a practical compliance plan and shows the evidence that must exist.</p><select id="mentorTopic" onchange="mentorExplain()"><option value="Legal register">Legal register</option><option value="HIRARC">HIRARC</option><option value="CHRA">CHRA</option><option value="Noise risk assessment">Noise risk assessment</option><option value="Safety committee">Safety committee</option><option value="Emergency drill">Emergency drill</option><option value="OSHWA / SOLVE">OSHWA / SOLVE</option></select></div>
-<div class="card mentor-daily"><div class="mentor-card-head"><h4>Worked-example mindset</h4><span class="badge blue" id="mentorDailyDate">Today</span></div><div id="mentorDailyExample" aria-live="polite" class="mentor-content"></div><button type="button" class="btn small" onclick="go(dailyMentorExample().target)">Open related module ↗</button></div>
-<div class="card mentor-daily"><div class="mentor-card-head"><h4>Micro-learning</h4><span class="badge green" id="mentorDailyStatus">New today</span></div><div id="mentorDailyLesson" aria-live="polite" class="mentor-content"></div><div class="mentor-actions"><button type="button" class="btn teal small" id="mentorLearnBtn" onclick="toggleTodayLesson()">Start today's lesson</button><button type="button" class="btn small" onclick="go(dailyMentorLesson().target)">Apply in app ↗</button></div><div id="mentorLessonExpanded" class="mentor-lesson-expanded" hidden></div><label class="check mentor-complete"><input type="checkbox" id="mentorDoneToday" onchange="markMentorDone(this.checked)"> Mark today's lesson completed</label></div>
-</div>
-
-@endverbatim
+{{-- Learning is part of personal space. --}}

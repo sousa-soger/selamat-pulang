@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -17,6 +18,21 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public function assertAvailableForOrganization(?int $organizationId = null): void
+    {
+        $query = $this->organizations();
+        if ($organizationId !== null) {
+            $query->where('organizations.id', '!=', $organizationId);
+        }
+        $owned = Organization::where('owner_id', $this->id);
+        if ($organizationId !== null) {
+            $owned->whereKeyNot($organizationId);
+        }
+        if ($query->exists() || $owned->exists()) {
+            throw ValidationException::withMessages(['organization' => 'This user already belongs to an organization. Remove their existing membership before assigning another.']);
+        }
+    }
 
     public function isSuperAdmin(): bool
     {

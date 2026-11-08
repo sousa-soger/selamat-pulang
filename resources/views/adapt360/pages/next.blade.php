@@ -1,6 +1,6 @@
 @verbatim
 
-<div class="hero"><div><h1>Organization priorities</h1><p>A shared workplace priority list, not a personal assignment list. Generated from the workplace profile, legal status, risk controls, due dates and SOLVE/OSHWA gaps.</p></div><button class="btn teal" onclick="generateNextSteps()" type="button">Recalculate priorities</button></div>
+<div class="hero"><div><h1>Organization priorities</h1><p>A shared workplace priority list, not a personal assignment list. Generated from the workplace profile, legal status, risk controls, due dates and SOLVE/OSHWA gaps.</p></div></div>
 <div class="next-grid">
 <div class="card next-board"><h4>Priority queue</h4><p class="note">Every priority below is interactive. Use the open button to jump straight to the right module.</p><div class="list" id="nextList"></div></div>
 <div class="card next-guide"><h4>First 90 days / new OSH coordinator</h4>

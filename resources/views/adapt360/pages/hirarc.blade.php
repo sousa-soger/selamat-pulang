@@ -1,15 +1,4 @@
-@verbatim
-
-<div class="hero"><div><h1>JMS &amp; HIRARC</h1><p>Start with how the job is actually performed, then assess each job step. Risk score is calculated as <strong>Likelihood × Severity</strong> and linked controls feed the action tracker.</p></div><button type="button" class="btn primary" onclick="openModal('hirarcModal')">+ Add HIRARC row</button></div>
-<div class="grid g2">
-<div class="card"><h4>DOSH-style risk matrix prototype</h4><div><table class="matrix"><thead><tr><th>L \ S</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody id="matrixBody"></tbody></table></div><p class="note">Prototype bands only. Validate against the official matrix before production use.</p></div>
-<div class="card"><h4>JMS before HIRARC</h4><label>Activity</label><input value="Fabrication / MIG welding"><label>Job steps</label><textarea>1. Prepare work area
-2. Set up welding machine and gas
-3. Fit and tack components
-4. Weld joint
-5. Grind / finish
-6. Inspect and clean area</textarea><button type="button" class="btn" onclick="saveJMS()">Save JMS</button></div>
-</div>
-<div class="table-wrap"><table><thead><tr><th>ID</th><th>Activity</th><th>Hazard</th><th>L</th><th>S</th><th>Risk</th><th>Controls</th><th>Status</th><th></th></tr></thead><tbody id="hirarcRows"></tbody></table></div>
-
-@endverbatim
+<div class="hero"><div><h1>JMS &amp; HIRARC</h1><p>Document how work is done, then assess the hazards in each job step.</p></div><button type="button" class="btn primary" id="addHirarcButton" onclick="openHirarc()">+ Add HIRARC row</button></div>
+<div class="hirarc-guide"><div><span>01</span><strong>Describe the activity</strong><p>Name the job and who prepared it.</p></div><div><span>02</span><strong>List the work steps</strong><p>Record one action at a time, in order.</p></div><div><span>03</span><strong>Assess each step</strong><p>Identify hazards, rate risk and record controls.</p></div></div><div id="jmsEmpty" class="jms-welcome card" hidden><div><span class="jms-kicker">START WITH THE WORK</span><h2>Start your first job method statement</h2><p>No JMS has been created in your organization’s Adapt360 workspace yet. Ask your technical team and the people doing the work to document the job steps first. An owner or editor can then assess the hazards for each step.</p><button type="button" class="btn primary" onclick="openModal('jmsModal')">+ Create your first JMS</button></div><div class="jms-path"><div><b>01</b><span><strong>Document the job</strong><small>Record the activity and its actual work sequence.</small></span></div><div><b>02</b><span><strong>Assess each step</strong><small>Identify hazards, risks and controls in HIRARC.</small></span></div></div></div>
+<div id="jmsWorkspace" hidden><div class="jms-section-head"><div><h2>Job method statements</h2><p class="note">Prepared by your team as the basis for HIRARC.</p></div><button type="button" class="btn" onclick="openModal('jmsModal')">+ Create JMS</button></div><div id="jmsList" class="jms-list"></div><div class="jms-section-head"><div><h2>Hazard assessments</h2><p class="note">Risk is calculated as likelihood × severity.</p></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Activity / job step</th><th>Hazard</th><th><abbr title="Likelihood">L</abbr></th><th><abbr title="Severity">S</abbr></th><th>Risk</th><th>Controls</th><th>Status</th><th></th></tr></thead><tbody id="hirarcRows"></tbody></table><p id="hirarcEmpty" class="jms-table-empty">No HIRARC assessments yet. Add one for a saved job step.</p></div></div>
+<details class="card jms-matrix"><summary>Risk matrix reference · likelihood × severity</summary><table class="matrix"><thead><tr><th>L / S</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead><tbody id="matrixBody"></tbody></table><p class="note">Prototype bands only. Validate against the official matrix before production use.</p></details>

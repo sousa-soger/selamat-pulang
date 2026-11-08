@@ -1,11 +1,12 @@
 import QRCode from 'qrcode';
+import { renderHomeTodos } from './home-dashboard.js';
 window.QRCode = QRCode;
 
 
 const $=id=>document.getElementById(id);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const state = JSON.parse(document.getElementById('workspace-data').textContent);
-for(const key of ['actions','hirarc','workers','equipment','chemicals','training','contractors','permits','incidents','calendar','members','drills','changeHistory','solveChecks','linkedReviews']) state[key] ??= [];
+for(const key of ['actions','hirarc','jms','workers','equipment','chemicals','training','contractors','permits','incidents','calendar','members','drills','changeHistory','solveChecks','linkedReviews']) state[key] ??= [];
 state.profile ??= {company:document.body.dataset.organizationName || 'Select an organization',industry:'',employees:0,site:'',lead:'',foreign:'no',chemical:false,noise:false,ergo:false,iaq:false,machinery:false,contractor:false,hotwork:false,height:false,confined:false};
 if(!state.solveChecks.length) state.solveChecks=[
 {name:'OSH policy approved',element:'Management',evidence:'Policy & Roles',done:false},
@@ -114,7 +115,61 @@ Object.assign(MS_MAP, {
   "→ What needs attention?": "→ Apakah yang memerlukan perhatian?",
   "View organization priorities": "Lihat keutamaan organisasi",
   "View readiness, calendar & management reports": "Lihat kesediaan, kalendar & laporan pengurusan",
-  "A shared workplace priority list, not a personal assignment list. Generated from the workplace profile, legal status, risk controls, due dates and SOLVE/OSHWA gaps.": "Senarai keutamaan bersama tempat kerja, bukan senarai tugasan peribadi. Dijana daripada profil tempat kerja, status perundangan, kawalan risiko, tarikh akhir dan jurang SOLVE/OSHWA."
+  "A shared workplace priority list, not a personal assignment list. Generated from the workplace profile, legal status, risk controls, due dates and SOLVE/OSHWA gaps.": "Senarai keutamaan bersama tempat kerja, bukan senarai tugasan peribadi. Dijana daripada profil tempat kerja, status perundangan, kawalan risiko, tarikh akhir dan jurang SOLVE/OSHWA.",
+  // Home cards: profile, organization and personal to-do list.
+  "Profile": "Profil",
+  "Your account": "Akaun anda",
+  "Manage profile": "Urus profil",
+  "MyKKP ID": "ID MyKKP",
+  "MyKKP not verified": "MyKKP belum disahkan",
+  "MyKKP verification in progress": "Pengesahan MyKKP sedang diproses",
+  "MyKKP verified": "MyKKP disahkan",
+  "MyKKP verification needs attention": "Pengesahan MyKKP perlu perhatian",
+  "Not submitted": "Belum dihantar",
+  "Pending review": "Menunggu semakan",
+  "Verified": "Disahkan",
+  "Needs attention": "Perlu perhatian",
+  "Add your MyKKP ID and upload your certificate so an administrator can verify it.": "Tambah ID MyKKP anda dan muat naik sijil supaya pentadbir boleh mengesahkannya.",
+  "Your certificate is awaiting manual review. You will be notified when it has been approved.": "Sijil anda sedang menunggu semakan manual. Anda akan dimaklumkan apabila ia diluluskan.",
+  "Your MyKKP certificate has been reviewed and approved.": "Sijil MyKKP anda telah disemak dan diluluskan.",
+  "Your certificate was not approved. Upload a corrected certificate to start a new review.": "Sijil anda tidak diluluskan. Muat naik sijil yang dibetulkan untuk memulakan semakan baharu.",
+  "Your role": "Peranan anda",
+  "Workspace": "Ruang kerja",
+  "Access": "Akses",
+  "Members": "Ahli",
+  "Owner": "Pemilik",
+  "Editor": "Penyunting",
+  "Viewer": "Pemerhati",
+  "Active": "Aktif",
+  "Editable": "Boleh diedit",
+  "View only": "Lihat sahaja",
+  "No organization selected": "Tiada organisasi dipilih",
+  "The shared workspace that holds your safety records, priorities and evidence.": "Ruang kerja bersama yang menyimpan rekod keselamatan, keutamaan dan bukti anda.",
+  "Choose or create an organization to keep workplace records and priorities in one place.": "Pilih atau cipta organisasi untuk menyimpan rekod tempat kerja dan keutamaan di satu tempat.",
+  "Choose an organization": "Pilih organisasi",
+  "To-do list": "Senarai tugasan",
+  "Your space": "Ruang anda",
+  "Your workspace": "Ruang kerja anda",
+  "A clear view of your workplace and what needs attention.": "Gambaran jelas tentang tempat kerja anda dan perkara yang memerlukan perhatian.",
+  "A little room to plan": "Ruang untuk merancang",
+  "Your personal to-do list will appear here in a future update.": "Senarai tugasan peribadi anda akan dipaparkan di sini dalam kemas kini akan datang.",
+  "Coming soon": "Akan datang",
+  "No tasks yet": "Tiada tugasan lagi",
+  "Report something unsafe": "Laporkan sesuatu yang tidak selamat",
+  "Your safety at a glance": "Keselamatan anda sekilas",
+  "Follow the signals below to review your records and take the next step.": "Ikuti isyarat di bawah untuk menyemak rekod anda dan mengambil langkah seterusnya.",
+  "All priorities": "Semua keutamaan",
+  "Focus first": "Fokus dahulu",
+  "Ordered from the workspace priority queue.": "Disusun daripada baris gilir keutamaan ruang kerja.",
+  "OSH system": "Sistem KKP",
+  "Risk management": "Pengurusan risiko",
+  "Control": "Kawalan",
+  "Excellence": "Kecemerlangan",
+  "Build the foundations": "Bina asas",
+  "Understand exposure": "Fahami pendedahan",
+  "Follow through on risks": "Ikuti risiko sehingga selesai",
+  "Keep improving": "Terus bertambah baik",
+  "Signals reflect the records in this workspace and are not a certification or a complete risk assessment.": "Isyarat ini mencerminkan rekod dalam ruang kerja ini dan bukan pensijilan atau penilaian risiko yang lengkap."
 });
 
 function translateText(en){
@@ -123,6 +178,8 @@ function translateText(en){
  if(Object.prototype.hasOwnProperty.call(MS_MAP,trim))return en.replace(trim,MS_MAP[trim]);
  if(trim.startsWith('· '))return en.replace(trim,'· '+translateText(trim.slice(2)));
  let param;
+ if(param=trim.match(/^Welcome back, (.+)\.$/))return 'Selamat kembali, '+param[1]+'.';
+ if(param=trim.match(/^(\d+)\s+members?$/))return param[1]+' ahli';
  if(param=trim.match(/^(\d+) overdue$/))return param[1]+' tertunggak';
  if(param=trim.match(/^(\d+) overdue corrective action\(s\) need closure and evidence\.$/))return param[1]+' tindakan pembetulan tertunggak perlu ditutup bersama bukti.';
  if(param=trim.match(/^(\d+) legal \/ evidence gap\(s\) are still not fully compliant\.$/))return param[1]+' jurang perundangan / bukti masih belum patuh sepenuhnya.';
@@ -206,12 +263,22 @@ function initLanguageObserver(){
  translationObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
 }
 
+let pendingSaves=0;
+function syncStatus(message){document.getElementById('workspace-sync-status')?.replaceChildren(document.createTextNode(message));}
 function save(){
-const organization=document.body.dataset.organizationId;if(!organization)return;
-const snapshot=JSON.stringify(state);
-saveQueue=saveQueue.then(async()=>{if(saveFailed)return;const response=await fetch('/organizations/'+organization+'/workspace',{method:'PUT',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({data:JSON.parse(snapshot),version:workspaceVersion})});if(!response.ok)throw new Error('Changes could not be saved. Reload before editing; another member may have updated this workspace.');workspaceVersion=(await response.json()).version;}).catch(error=>{saveFailed=true;alert(error.message);});
+const organization=document.body.dataset.organizationId;if(!organization||document.body.dataset.canEdit!=='true')return;
+const snapshot=JSON.stringify(state);pendingSaves++;syncStatus('Saving…');document.body.classList.add('is-saving');
+saveQueue=saveQueue.then(async()=>{if(saveFailed)return false;const response=await fetch('/organizations/'+organization+'/workspace',{method:'PUT',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({data:JSON.parse(snapshot),version:workspaceVersion})});if(!response.ok)throw new Error('Not saved. Another member may have edited these records. Reload before continuing.');workspaceVersion=(await response.json()).version;syncStatus('Saved to organization');return true;}).catch(error=>{saveFailed=true;syncStatus(error.message);alert(error.message);return false;}).finally(()=>{pendingSaves--;if(!pendingSaves)document.body.classList.remove('is-saving');});return saveQueue;
 }
-function go(id){ window.adaptNavigate?.(id); }
+window.addEventListener('beforeunload',event=>{if(pendingSaves||saveFailed){event.preventDefault();event.returnValue='';}});
+async function refreshSharedWorkspace(){
+if(!document.body.dataset.organizationId||pendingSaves||saveFailed||document.hidden||document.querySelector('dialog[open]')||document.activeElement?.matches('input,textarea,select'))return;
+try{const response=await fetch('/organizations/'+document.body.dataset.organizationId+'/workspace',{headers:{Accept:'application/json'}});if(!response.ok){syncStatus('Unable to refresh organization data');return;}const latest=await response.json();if(latest.version>workspaceVersion){Object.assign(state,latest.data);workspaceVersion=latest.version;renderAll();syncStatus('Updated from organization');}}catch(error){syncStatus('Connection interrupted. Retrying…');}
+}
+setInterval(refreshSharedWorkspace,10000);
+window.addEventListener('focus',refreshSharedWorkspace);
+
+function go(id){ window.adaptNavigate?.(id === 'committee' ? 'organization' : id); }
 document.querySelectorAll('.nav button[data-section]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.section)));
 document.querySelectorAll('.nav-group-toggle').forEach(btn=>btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open')));
 document.querySelectorAll('.clickable-metric').forEach(card=>card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();card.click()}}));
@@ -329,20 +396,46 @@ function legalItems(){
  return a
 }
 function buildLegal(){
- const rows=legalItems().map(x=>`<tr><td><strong>${esc(x.req)}</strong></td><td>${esc(x.why)}</td><td>${esc(x.ev)}</td><td><select onchange="state.legalStatus['${esc(x.key)}']=this.value;save();renderAll()"><option ${state.legalStatus[x.key]==='Compliant'?'selected':''}>Compliant</option><option ${state.legalStatus[x.key]==='Partial'?'selected':''}>Partial</option><option ${state.legalStatus[x.key]==='Not assessed'?'selected':''}>Not assessed</option><option ${state.legalStatus[x.key]==='Not compliant'?'selected':''}>Not compliant</option></select></td><td>${officialLink(x.key)}</td></tr>`).join('');
- $('legalRows').innerHTML=rows;
+ const items=legalItems(),statuses=['Not assessed','Partial','Compliant','Not compliant'];
+ const legalTone=value=>({'Not assessed':'unassessed','Partial':'partial','Compliant':'compliant','Not compliant':'noncompliant'})[value]||'unassessed';
+ const p=state.profile, count=Number(p.employees)||0;
+ const exclusions=[
+ ['policy','Written OSH policy',count>0?`The profile records ${count} employees; this app lists this entry only above 5 employees.`:'Employee count is missing or zero; this app lists this entry only above 5 employees.'],
+ ['coordinator','OSH Coordinator appointment',p.lead==='SHO'?'The OSH lead is set to SHO; the app suppresses its coordinator suggestion. Confirm the appropriate appointment for your workplace.':`The profile records ${count} employees; this app lists the coordinator suggestion from 5 employees when the OSH lead is not SHO.`],
+ ['committee','Safety & Health Committee',`The profile records ${count} employees; the app lists this entry from 40 employees. A DOSH direction is not captured by the current profile rules.`],
+ ['contractor','Principal / contractor duties','The Contractors workplace trigger is not selected.'],
+ ['chemical','Chemical register / SDS / CHRA follow-up','The Chemicals used workplace trigger is not selected.'],
+ ['noise','Noise risk assessment pathway','The Significant noise / grinding workplace trigger is not selected.'],
+ ['ergo','Ergonomics risk assessment pathway','The Manual handling / ergonomic risk workplace trigger is not selected.'],
+ ['iaq','Indoor air quality pathway','The Air-conditioned indoor area workplace trigger is not selected.']
+ ].filter(([key])=>!items.some(item=>item.key===key));
+ if($('legalUnlistedCount'))$('legalUnlistedCount').textContent='('+exclusions.length+')';
+ if($('legalUnlistedRows'))$('legalUnlistedRows').innerHTML=exclusions.length?exclusions.map(([key,title,reason])=>`<article class="legal-exclusion"><h3>${esc(title)}</h3><p>${esc(reason)}</p><div>${officialLink(key)}</div></article>`).join(''):'<p class="note">All requirements supported by the current profile rules are listed above.</p>';
+ const query=($('legalSearch')?.value||'').toLowerCase();
+ const editable=document.body.dataset.canEdit==='true';
+ $('legalRows').innerHTML=items.filter(x=>(x.req+' '+x.why+' '+x.ev).toLowerCase().includes(query)).map(x=>{
+ const status=state.legalStatus[x.key]||'Not assessed';
+ return `<tr><td><strong>${esc(x.req)}</strong></td><td>${esc(x.why)}</td><td>${esc(x.ev)}</td><td>${editable?`<details class="legal-status-menu legal-tone-${legalTone(status)}"><summary aria-label="Status for ${esc(x.req)}"><span>${esc(status)}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m6 9 6 6 6-6"/></svg></summary><div class="legal-status-options">${statuses.map(value=>`<button type="button" class="legal-option-${legalTone(value)}" aria-pressed="${value===status}" onclick="state.legalStatus['${x.key}']='${value}';save();renderAll()"><span>${value}</span><span>${value===status?'✓':''}</span></button>`).join('')}</div></details>`:esc(status)}</td><td>${officialLink(x.key)}</td></tr>`;
+ }).join('')||'<tr><td colspan="5">No matching requirements.</td></tr>';
+ if($('legalTotals'))$('legalTotals').innerHTML=`<span><strong>${items.length}</strong> applicable requirements</span>`+statuses.map(status=>`<span class="legal-total-badge legal-tone-${legalTone(status)}"><strong>${items.filter(x=>(state.legalStatus[x.key]||'Not assessed')===status).length}</strong> ${status}</span>`).join('');
 }
 function generateNextSteps(){
  const priorities=[];
+ if(!(state.hraRecords||[]).length&&!Object.keys(state.assessments||{}).length)priorities.push({title:'Start your first health risk assessment',why:'Review workplace exposures, then upload a report or add an assessment manually.',urg:'High',target:'hra',source:'Health risk assessments'});
+ (state.hraRecords||[]).forEach(record=>{if(record.due&&record.due<dateISO(new Date()))priorities.push({title:'Review overdue: '+record.title,why:'Assessment review due '+record.due,urg:'High',target:'hra',source:'Health risk assessments'});(record.items||[]).filter(item=>item.status!=='Done').forEach(item=>priorities.push({title:item.title,why:record.title+(item.due?' · Due '+item.due:''),urg:['Urgent','High'].includes(item.priority)||(item.due&&item.due<dateISO(new Date()))?'High':item.priority==='Low'?'Low':'Medium',target:'hra',source:'Health risk assessments'}));});
  legalItems().forEach(x=>{let s=state.legalStatus[x.key]||'Not assessed';if(s!=='Compliant')priorities.push({title:x.req,why:`Status: ${s}. Evidence needed: ${esc(x.ev)}`,urg:s==='Not compliant'?'High':s==='Not assessed'?'High':'Medium',target:'legal',source:'Legal register'})});
- state.actions.filter(a=>a.status!=='Closed').forEach(a=>priorities.push({title:a.text,why:`${esc(a.source)} · Owner: ${esc(a.owner)} · Due ${esc(a.due)}`,urg:a.status==='Overdue'?'High':'Medium',target:a.reviewId?'adapt':'capa',source:a.source}));
+ state.actions.filter(a=>a.status!=='Closed').forEach(a=>priorities.push({title:a.text,why:`${esc(a.source)} · Owner: ${esc(a.owner)} · Due ${esc(a.due)}`,urg:a.status==='Overdue'||(a.due&&a.due<dateISO(new Date()))?'High':'Medium',target:a.reviewId?'adapt':'capa',source:a.source}));
  state.solveChecks.filter(x=>!x.done).forEach(x=>priorities.push({title:'SOLVE: '+x.name,why:'Evidence checkpoint: '+x.evidence,urg:'Medium',target:'solve',source:'SOLVE'}));
  (state.linkedReviews||[]).filter(x=>x.status!=='Closed').forEach(x=>priorities.push({title:'Linked review: '+x.label,why:`Adaptive review due ${esc(x.due)}. Links: ${x.links.join(', ')}`,urg:'Medium',target:'adapt',source:'Adapt Engine'}));
+ state.permits.filter(row=>row.status!=='Closed').forEach(row=>{const expired=Number.isFinite(Date.parse(row.until))&&new Date(row.until)<new Date();if(expired||row.status==='Pending')priorities.push({title:(expired?'Expired permit: ':'Review permit: ')+row.type,why:row.area+' · '+row.until,urg:expired?'High':'Medium',target:'ptw',source:'Permit to work'});});
+ state.incidents.filter(row=>!['Resolved','Closed'].includes(row.status)).forEach(row=>priorities.push({title:'Investigate: '+row.event,why:row.area+' · '+row.status,urg:'High',target:'incidents',source:'Incident'}));
+ organizationCalendarEntries().filter(row=>row.status!=='Completed'&&row.status!=='Closed'&&row.date&&row.date<dateISO(new Date())).forEach(row=>priorities.push({title:'Overdue: '+row.item,why:row.date+' · '+row.type,urg:'High',target:row.source||'calendar',source:'Calendar'}));
  priorities.forEach(p=>{p.target=priorityTarget(p); const info=routeInfoFor(p.target); p.route=info.label; p.routeWhy=info.why;});
  priorities.sort((a,b)=>({High:0,Medium:1,Low:2}[a.urg]-({High:0,Medium:1,Low:2}[b.urg])));
  const renderCard=(p,i,compact=false)=>`<div class="${compact?'dashboard-next-card':'priority-card '+p.urg.toLowerCase()}">${compact?'':`<div class="priority-rank">${i+1}</div>`}<div class="meta"><strong>${compact?'':(i+1)+'. '}${esc(p.title)}</strong><small>${esc(p.why)}</small><div class="route">Open: ${p.route} <em>· ${p.routeWhy}</em></div></div><div class="priority-actions"><span class="badge ${p.urg==='High'?'red':p.urg==='Medium'?'amber':'green'}">${p.urg}</span><button class="btn small" onclick="openPriority('${p.target}')" type="button">Open</button></div></div>`;
- $('nextList').innerHTML=priorities.length?priorities.slice(0,12).map((p,i)=>renderCard(p,i,false)).join(''):'<div class="note">No outstanding priorities.</div>';
- $('dashboardNext').innerHTML=priorities.length?priorities.slice(0,3).map((p,i)=>renderCard(p,i,true)).join(''):'<div class="note">No outstanding priorities.</div>';
+ $('nextList').innerHTML=priorities.length?priorities.map((p,i)=>renderCard(p,i,false)).join(''):'<div class="note">No outstanding priorities.</div>';
+ if($('dashboardNext')) $('dashboardNext').innerHTML=priorities.length?priorities.slice(0,3).map((p,i)=>renderCard(p,i,true)).join(''):'<div class="note">No outstanding priorities.</div>';
+ if($('homePriorityList'))$('homePriorityList').innerHTML=priorities.length?priorities.slice(0,3).map(p=>`<a href="/${esc(p.target)}" data-section="${esc(p.target)}"><span><strong>${esc(p.title)}</strong><small>${esc(p.source)} · ${esc(p.urg)} priority</small></span><b aria-hidden="true">↗</b></a>`).join(''):'<p>No outstanding priorities in the current queue.</p>';
 }function getFiveSPct(){
  const arr=Array.isArray(state.fiveSChecks)&&state.fiveSChecks.length===10?state.fiveSChecks:Array(10).fill(false);
  return Math.round(arr.filter(Boolean).length/arr.length*100)
@@ -357,16 +450,16 @@ function renderDashboard(){
  const li=legalItems();
  const comp=li.filter(x=>state.legalStatus[x.key]==='Compliant').length;
  const pct=Math.round(comp/li.length*100);
- $('metricCompliance').textContent=pct+'%';$('metricComplianceBar').style.width=pct+'%';
+ if($('metricCompliance')) $('metricCompliance').textContent=pct+'%';if($('metricComplianceBar')) $('metricComplianceBar').style.width=pct+'%';
  const open=state.actions.filter(a=>a.status!=='Closed');
  const overdueCount=open.filter(a=>a.status==='Overdue').length;
- $('metricActions').textContent=open.length;$('metricOverdue').textContent=overdueCount+' overdue';
+ if($('metricActions')) $('metricActions').textContent=open.length;if($('metricOverdue')) $('metricOverdue').textContent=overdueCount+' overdue';
  const assessed=state.hirarc.length, target=Math.max(assessed+1,5), hirarcPct=Math.min(100,Math.round(assessed/target*100));
- $('metricHirarc').textContent=hirarcPct+'%';
- const pendingLinked=(state.linkedReviews||[]).filter(r=>r.status!=='Closed').length; $('metricLinked').textContent=pendingLinked;
+ if($('metricHirarc')) $('metricHirarc').textContent=hirarcPct+'%';
+ const pendingLinked=(state.linkedReviews||[]).filter(r=>r.status!=='Closed').length; if($('metricLinked')) $('metricLinked').textContent=pendingLinked;
  const solve=getSolveSnapshot();
  const fiveSPct=getFiveSPct();
- $('metricStage').textContent=solve.stage;$('metricSolve').textContent='SOLVE: '+solve.level+' track';
+ if($('metricStage')) $('metricStage').textContent=solve.stage;if($('metricSolve')) $('metricSolve').textContent='SOLVE: '+solve.level+' track';
  const readiness=Math.max(0,Math.min(100,Math.round((pct*0.35)+(solve.overall*0.30)+(fiveSPct*0.15)+(hirarcPct*0.20)-(overdueCount*2)-(pendingLinked*2))));
  const nextStage={Start:'Comply',Comply:'Manage',Manage:'Excellence',Excellence:'Sustain & Showcase'}[solve.stage];
  const stageRanges={Start:[0,54],Comply:[55,74],Manage:[75,89],Excellence:[90,100]};
@@ -378,6 +471,7 @@ function renderDashboard(){
  const blockerBadge=overdueCount>0||pct<80||solve.overall<75?'Needs attention':'Controlled';
  const focusText=overdueCount>0?'Close overdue actions first, then refresh linked controls and evidence.':pct<80?'Upgrade legal status selections by closing evidence gaps and incomplete requirements.':fiveSPct<80?'Improve workplace conditions using the 5S + Safety checklist.':'Start packaging evidence for audit, ISO 45001 and award readiness.';
  const focusBadge=overdueCount>0||pct<80?'Priority':fiveSPct<80?'Improve':'Advance';
+ if($('readinessScore')) {
  $('readinessScore').textContent=readiness+'%';$('readinessBar').style.width=readiness+'%';
  $('statusHeadline').textContent=`You are currently in the ${solve.stage} stage`;
  $('statusNarrative').textContent=`Adapt360 places the organisation in ${solve.stage} because compliance readiness is ${pct}%, SOLVE maturity is ${solve.overall}%, 5S performance is ${fiveSPct}% and HIRARC coverage is ${hirarcPct}%.`;
@@ -386,13 +480,14 @@ function renderDashboard(){
  $('statusCompBadge').textContent=pct+'%';$('statusSolveBadge').textContent=solve.overall+'%';$('status5SBadge').textContent=fiveSPct+'%';
  $('statusBlockerText').textContent=blockerText;$('statusBlockerBadge').textContent=blockerBadge;
  $('statusFocusText').textContent=focusText;$('statusFocusBadge').textContent=focusBadge;
+ }
  ['Start','Comply','Manage','Excellence'].forEach(name=>{let el=$('dashStage'+name); if(!el) return; el.classList.toggle('active',solve.stage===name); el.classList.toggle('done',['Start','Comply','Manage','Excellence'].indexOf(name)<['Start','Comply','Manage','Excellence'].indexOf(solve.stage));});
- $('managementView').innerHTML=`<div class="list"><div class="management-link-item"><div class="meta"><strong>${li.length-comp} compliance gaps require attention</strong><small>Legal register is generated from the current workplace profile.</small></div><div class="driver-actions">${statusBadge(pct>=80?'On track':'Action needed')}<button class="btn small" onclick="go('legal')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>${open.length} open corrective actions</strong><small>${overdueCount} are overdue.</small></div><div class="driver-actions">${statusBadge(overdueCount>0?'Overdue':'Current')}<button class="btn small" onclick="go('capa')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>${pendingLinked} adaptive review(s) are still open</strong><small>These reviews were generated from linked modules and workplace changes.</small></div><div class="driver-actions">${statusBadge(pendingLinked>0?'Review':'Current')}<button class="btn small" onclick="go('adapt')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>Strongest driver: ${strongest.label}</strong><small>Current contribution to overall status: ${strongest.value}%.</small></div><div class="driver-actions">${statusBadge(strongest.value>=80?'Strong':'Review')}<button class="btn small" onclick="go('${strongest.target}')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>Current next destination: ${nextStage}</strong><small>${focusText}</small></div><div class="driver-actions">${statusBadge(focusBadge)}<button class="btn small" onclick="go('${focusBadge==='Advance'?'excel':focusBadge==='Improve'?'fives':'next'}')" type="button">Open</button></div></div></div>`;
+ if($('managementView')) $('managementView').innerHTML=`<div class="list"><div class="management-link-item"><div class="meta"><strong>${li.length-comp} compliance gaps require attention</strong><small>Legal register is generated from the current workplace profile.</small></div><div class="driver-actions">${statusBadge(pct>=80?'On track':'Action needed')}<button class="btn small" onclick="go('legal')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>${open.length} open corrective actions</strong><small>${overdueCount} are overdue.</small></div><div class="driver-actions">${statusBadge(overdueCount>0?'Overdue':'Current')}<button class="btn small" onclick="go('capa')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>${pendingLinked} adaptive review(s) are still open</strong><small>These reviews were generated from linked modules and workplace changes.</small></div><div class="driver-actions">${statusBadge(pendingLinked>0?'Review':'Current')}<button class="btn small" onclick="go('adapt')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>Strongest driver: ${strongest.label}</strong><small>Current contribution to overall status: ${strongest.value}%.</small></div><div class="driver-actions">${statusBadge(strongest.value>=80?'Strong':'Review')}<button class="btn small" onclick="go('${strongest.target}')" type="button">Open</button></div></div><div class="management-link-item"><div class="meta"><strong>Current next destination: ${nextStage}</strong><small>${focusText}</small></div><div class="driver-actions">${statusBadge(focusBadge)}<button class="btn small" onclick="go('${focusBadge==='Advance'?'excel':focusBadge==='Improve'?'fives':'next'}')" type="button">Open</button></div></div></div>`;
  const trainingPct=Math.round((state.training.filter(x=>!/overdue|expired/i.test(x.status)).length/Math.max(1,state.training.length))*100);
  const emergencyStatus=state.legalStatus.emergency||'Partial';
  const emergencyPct=/Compliant/i.test(emergencyStatus)?100:/Partial/i.test(emergencyStatus)?65:/Not assessed/i.test(emergencyStatus)?35:15;
  const auditPct=Math.round((pct+solve.overall)/2);
- [['evidenceLegal',pct],['evidenceRisk',hirarcPct],['evidenceTraining',trainingPct],['evidenceEmergency',emergencyPct],['evidenceAudit',auditPct]].forEach(([id,val])=>{$(id+'Pct').textContent=val+'%';$(id+'Bar').style.width=val+'%';});
+ [['evidenceLegal',pct],['evidenceRisk',hirarcPct],['evidenceTraining',trainingPct],['evidenceEmergency',emergencyPct],['evidenceAudit',auditPct]].forEach(([id,val])=>{if($(id+'Pct')) $(id+'Pct').textContent=val+'%';if($(id+'Bar')) $(id+'Bar').style.width=val+'%';});
 }function renderMatrix(){let h='';for(let l=5;l>=1;l--){h+=`<tr><th>${l}</th>`;for(let s=1;s<=5;s++){let n=l*s,cl=n<=4?'m-low':n<=9?'m-med':'m-high';h+=`<td class="${cl}">${n}</td>`}h+='</tr>'}$('matrixBody').innerHTML=h}
 
 const linkTargets={
@@ -447,7 +542,7 @@ function linkReview(kind,label,links){
   state.calendar.push({date:due,item:'Linked review: '+clean,type:'Adaptive review',owner:state.profile.lead||'OSH Coordinator',status:'Planned',reviewId:id,actionId});
   return id;
 }
-function completeLinkedAction(i){
+function completeLinkedAction(i){if(!confirm('Are you sure you want to close this corrective action?'))return;
  const a=state.actions[i];if(!a)return;
  a.status='Closed';
  if(a.reviewId){const review=(state.linkedReviews||[]).find(x=>x.id===a.reviewId);if(review)review.status='Closed';state.calendar.filter(x=>x.reviewId===a.reviewId).forEach(x=>x.status='Completed')}
@@ -470,6 +565,15 @@ function setCalendarField(i,field,value){const row=state.calendar[i];if(!row)ret
 let calView=new Date();calView=new Date(calView.getFullYear(),calView.getMonth(),1);
 function changeCalMonth(delta){calView=new Date(calView.getFullYear(),calView.getMonth()+delta,1);renderDashboardCalendar()}
 function dateISO(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function organizationCalendarEntries(){
+ const rows=state.calendar.map((entry,index)=>({...entry,calendarIndex:index}));
+ const add=(entry)=>{if(entry.date&&!rows.some(row=>row.date===entry.date&&row.item===entry.item))rows.push(entry);};
+ state.actions.forEach(x=>add({date:x.due,item:x.text,type:'Corrective action',owner:x.owner,status:x.status==='Closed'?'Completed':x.status,source:'capa'}));
+ state.drills.forEach(x=>add({date:x.date,item:x.type+' drill',type:'Drill',owner:'ERT',status:x.status,source:'emergency'}));
+ state.training.forEach(x=>add({date:x.due,item:x.what,type:'Training',owner:x.who||'',status:x.status,source:'training'}));
+ JSON.parse(document.getElementById('calendar-training-data')?.textContent||'[]').forEach(add);
+ return rows.filter(x=>x.date);
+}
 function renderDashboardCalendar(){
  const label=$('calMonthLabel'),grid=$('calMonthGrid'),list=$('calUpcomingList');if(!label||!grid||!list)return;
  const month=calView.getMonth(),year=calView.getFullYear(),today=dateISO(new Date());
@@ -477,33 +581,30 @@ function renderDashboardCalendar(){
  const first=new Date(year,month,1);const offset=(first.getDay()+6)%7;const from=new Date(year,month,1-offset);
  let html='';
  for(let i=0;i<42;i++){
-  const d=new Date(from.getFullYear(),from.getMonth(),from.getDate()+i),iso=dateISO(d),events=state.calendar.filter(x=>x.date===iso);
+  const d=new Date(from.getFullYear(),from.getMonth(),from.getDate()+i),iso=dateISO(d),events=organizationCalendarEntries().filter(x=>x.date===iso);
   const isOutside=d.getMonth()!==month;
   const classes=['cal-day',isOutside?'is-outside':'',iso===today?'is-today':'',events.length?'has-events':'',events.some(x=>iso<today&&x.status!=='Completed')?'is-overdue':''].filter(Boolean).join(' ');
-  html+=`<button class="${classes}" type="button" onclick="go('calendar')" title="${events.length} events on ${iso}. Open to edit" aria-label="${iso}: ${events.length} items — open calendar">${d.getDate()}</button>`
+  html+=`<button class="${classes}" type="button" onclick="go('calendar');toggleOrganizationDueDate(true,'${iso}')" title="${events.length} events on ${iso}. Open to edit" aria-label="${iso}: ${events.length} items — open calendar">${d.getDate()}</button>`
  }
  grid.innerHTML=html;
- const all=[...state.calendar].filter(x=>x.status!=='Completed').sort((a,b)=>a.date.localeCompare(b.date));
+ const all=organizationCalendarEntries().filter(x=>{const filter=window.calendarEntryFilter||'All';const type=(x.type||'').toLowerCase();const category=/drill|emergency/.test(type)?'Emergency':/corrective|action/.test(type)?'Corrective actions':/training|assessment/.test(type)?'Training':'Other';return filter==='All'||filter===category;}).sort((a,b)=>(a.date+' '+(a.time||'')).localeCompare(b.date+' '+(b.time||'')));
  $('calEventCount').textContent=all.length+' items';
- list.innerHTML=all.length?all.slice(0,5).map(x=>`<button type="button" class="cal-event" onclick="go('calendar')"><span class="cal-event-date">${x.date?.slice(8)||'--'}<small>${x.date?.slice(0,7)||''}</small></span><span class="cal-event-title">${esc(x.item)}<small>${esc(x.owner)} · ${esc(x.type)}</small><strong class="jump-pill">Open in calendar ↗</strong></span></button>`).join(''):'<div class="cal-empty">No upcoming items. Open the calendar to create a due date.</div>';
+ list.innerHTML=all.length?all.map(x=>`<button type="button" class="cal-event" onclick="${x.source?`go('${x.source}')`:`editOrganizationCalendarEvent(${x.calendarIndex})`}"><span class="cal-event-date">${x.date?.slice(8)||'--'}<small>${x.date?.slice(0,7)||''}</small></span><span class="cal-event-title">${esc(x.item)}<small>${esc(x.owner)} · ${esc(x.type)}${x.subtype?' / '+esc(x.subtype):''} · ${esc(x.time||'All day')} · ${esc(x.status)}</small><strong class="jump-pill">${x.source?'Open':'Edit'} ↗</strong></span></button>`).join(''):'<div class="cal-empty">No upcoming items. Open the calendar to create a due date.</div>';
  if(currentLanguage==='ms')applyLanguage();
 }
 function esc(x){return String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 
-function renderHirarc(){ $('hirarcRows').innerHTML=state.hirarc.map((r,i)=>{let [b,c]=riskBand(riskScore(r.l,r.s));return `<tr><td>${esc(r.id)}</td><td>${esc(r.activity)}</td><td>${esc(r.hazard)}</td><td>${esc(r.l)}</td><td>${esc(r.s)}</td><td><span class="badge ${c}">${riskScore(r.l,r.s)} · ${b}</span></td><td>${esc(r.control)}</td><td>${statusBadge(r.status)}</td><td><button class="btn small danger" onclick="state.hirarc.splice(${i},1);save();renderAll()">Delete</button></td></tr>`}).join('')}
-function addHirarc(){let l=Math.min(5,Math.max(1,+$('hL').value)),s=Math.min(5,Math.max(1,+$('hS').value));state.hirarc.unshift({id:'HIR-'+String(100+state.hirarc.length+1),activity:$('hActivity').value,hazard:$('hHazard').value,l,s,control:$('hControl').value,status:'Review'});linkReview('HIRARC update',$('hActivity').value,['HIRARC','Corrective Action','Training']);save();closeModal('hirarcModal');renderAll();toast('HIRARC saved; linked review and due date created.');}
-function renderHRA(){
- const p=state.profile;const arr=[
-  ['Noise Risk Assessment','noise',p.noise,'In-house screening → registered noise risk assessor if required','Noise exposure pathway'],
-  ['Chemical Health Risk Assessment (CHRA)','chemical',p.chemical,'Chemical register/SDS → registered CHRA assessor','USECHH pathway'],
-  ['Ergonomics Risk Assessment','ergo',p.ergo,'IERA in-house → AERA by trained person if required','ERA pathway'],
-  ['Indoor Air Quality Assessment','iaq',p.iaq,'Walk-through/complaints → registered IAQ assessor if required','IAQ pathway'],
-  ['Psychosocial Risk (PRiSMA)','prisma',true,'Management commitment/briefing → trained person pathway','Psychosocial pathway']
- ];
- $('hraCards').innerHTML=arr.map(([name,key,applies,route,base])=>`<div class="card"><div class="toolbar" style="margin-top:0"><h4>${name}</h4>${applies?'<span class="badge blue">Applicable</span>':'<span class="badge grey">Not triggered</span>'}</div><p class="note">${route}</p><div class="item"><div><strong>Current status</strong><small>${base}</small></div>${statusBadge(state.legalStatus[key]||'Not assessed')}</div><button class="btn" style="margin-top:10px" onclick="go('legal')">Open workflow</button></div>`).join('')
+function renderHirarc(){
+ const hasJms=state.jms.length>0; $('jmsEmpty').hidden=hasJms; $('jmsWorkspace').hidden=!hasJms && !state.hirarc.length; $('addHirarcButton').hidden=!hasJms;
+ $('jmsList').innerHTML=state.jms.map((j,ji)=>`<article class="card jms-record"><div><span class="jms-kicker">JOB METHOD STATEMENT</span><h3>${esc(j.activity)}</h3><p class="note">Prepared by ${esc(j.preparedBy)}</p></div><ol>${j.steps.map((step,index)=>`<li><span>${esc(step)}</span><button type="button" class="btn small" onclick="openHirarc();document.getElementById('hActivity').value='${ji}:${index}'">Assess step ↗</button></li>`).join('')}</ol></article>`).join('');
+ $('hirarcEmpty').hidden=state.hirarc.length>0;
+ $('hirarcRows').innerHTML=state.hirarc.map((r,i)=>{let [b,c]=riskBand(riskScore(r.l,r.s));return '<tr><td>'+esc(r.id)+'</td><td>'+esc(r.activity)+'</td><td>'+esc(r.hazard)+'</td><td>'+esc(r.l)+'</td><td>'+esc(r.s)+'</td><td><span class="badge '+c+'">'+riskScore(r.l,r.s)+' · '+b+'</span></td><td>'+esc(r.control)+'</td><td>'+statusBadge(r.status)+'</td><td><button class="btn small danger" onclick="state.hirarc.splice('+i+',1);save();renderAll()">Delete</button></td></tr>'}).join('');
 }
-function renderActions(){ $('actionRows').innerHTML=state.actions.map((a,i)=>`<tr><td>${esc(a.id)}</td><td>${esc(a.source)}</td><td>${esc(a.text)}</td><td>${esc(a.owner)}</td><td>${esc(a.due)}</td><td>${statusBadge(a.status)}</td><td><button class="btn small" onclick="completeLinkedAction(${i})">Close</button> <button class="btn small danger" onclick="state.actions.splice(${i},1);save();renderAll()">Delete</button></td></tr>`).join('')}
-function addAction(){const action={id:nextRecordId('ACT',state.actions),source:$('aSource').value,text:$('aText').value,owner:$('aOwner').value,due:$('aDue').value||addDaysISO(),status:'Open'};state.actions.unshift(action);createCalendarFromAction(action);save();closeModal('actionModal');renderAll();toast('Corrective action added.')}
+function openHirarc(){const options=state.jms.flatMap((j,ji)=>j.steps.map((step,si)=>'<option value="'+ji+':'+si+'">'+esc(j.activity)+' — '+esc(step)+'</option>'));if(!options.length){toast('Create a JMS before adding a HIRARC assessment.');return;}$('hActivity').innerHTML='<option value="">Select a job step</option>'+options.join('');openModal('hirarcModal');}
+function addHirarc(){const match=/^(\d+):(\d+)$/.exec($('hActivity').value);const j=match&&state.jms[Number(match[1])];const step=j?.steps[Number(match?.[2])];if(!step){toast('Select a saved JMS job step.');return;}let l=Math.min(5,Math.max(1,+$('hL').value)),s=Math.min(5,Math.max(1,+$('hS').value));const activity=j.activity+' — '+step;state.hirarc.unshift({id:'HIR-'+String(100+state.hirarc.length+1),jmsId:j.id,step,activity,hazard:$('hHazard').value.trim(),l,s,control:$('hControl').value.trim(),status:'Review'});linkReview('HIRARC update',activity,['HIRARC','Corrective Action','Training']);save();closeModal('hirarcModal');$('hHazard').value='';$('hControl').value='';renderAll();toast('HIRARC saved; linked review and due date created.');}
+function renderHRA(){ window.renderHraWorkspace?.(); }
+function renderActions(){ $('actionRows').innerHTML=state.actions.map((a,i)=>`<tr><td>${esc(a.id)}</td><td>${esc(a.source)}</td><td>${esc(a.text)}</td><td>${esc(a.owner)}</td><td>${esc(a.due)}</td><td>${statusBadge(a.status)}</td><td><button class="btn small" onclick="completeLinkedAction(${i})">Close</button> <button class="btn small danger" onclick="if(confirm('Are you sure you want to delete this corrective action?')){state.actions.splice(${i},1);save();renderAll()}">Delete</button></td></tr>`).join('')}
+function addAction(){if($('aSource').value==='Custom'&&!$('aSourceCustom').value.trim()){toast('Enter a custom source.');return;}const action={id:nextRecordId('ACT',state.actions),source:($('aSource').value==='Custom'?$('aSourceCustom').value.trim():$('aSource').value),text:$('aText').value,owner:$('aOwner').value,due:$('aDue').value||addDaysISO(),status:'Open'};state.actions.unshift(action);createCalendarFromAction(action);save();closeModal('actionModal');renderAll();toast('Corrective action added.')}
 function renderWorkers(){$('workerRows').innerHTML=state.workers.map((w,i)=>`<tr><td><strong>${esc(w.name)}</strong></td><td>${esc(w.role)}</td><td>${esc(w.nat)}</td><td>${esc(w.work)}</td><td>${statusBadge(w.ind)}</td><td>${statusBadge(w.comp)}</td><td><button class="btn small danger" onclick="state.workers.splice(${i},1);save();renderAll()">Delete</button></td></tr>`).join('')}
 function addWorker(){state.workers.push({name:$('wName').value,role:$('wRole').value,nat:$('wNat').value,work:$('wWork').value,ind:'Pending',comp:'Review'});linkReview('New worker',$('wName').value,['Induction','Training Matrix','PPE']);save();closeModal('workerModal');renderAll();toast('Worker added, training review and calendar task created.');}
 function renderEquipment(){$('equipmentRows').innerHTML=state.equipment.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.cat)}</td><td>${esc(x.area)}</td><td>${esc(x.date)}</td><td>${esc(x.hir)}</td><td>${statusBadge(x.status)}</td><td><button class="btn small danger" onclick="state.equipment.splice(${i},1);save();renderAll()">Delete</button></td></tr>`).join('')}
@@ -527,16 +628,20 @@ function render5S(){
  $('fiveChecklist').innerHTML=fiveItems.map((x,i)=>`<label class="check"><input class="fiveBox" type="checkbox" ${state.fiveSChecks[i]?'checked':''} onchange="state.fiveSChecks[${i}]=this.checked;save();score5S()"> ${x}</label>`).join('');
  score5S(true)
 }
-function score5S(silent=false){let boxes=[...document.querySelectorAll('.fiveBox')];if(!boxes.length)return;state.fiveSChecks=boxes.map(b=>b.checked);let pct=Math.round(boxes.filter(b=>b.checked).length/boxes.length*100);$('fiveScore').textContent=pct+'%';$('fiveBar').style.width=pct+'%';$('fiveAdvice').textContent=pct>=90?'Strong workplace condition. Sustain through routine verification.':pct>=70?'Good base. Close the remaining workplace-improvement gaps.':'Priority: address obvious physical workplace and housekeeping gaps.';const f=state.solveChecks.find(x=>x.name==='5S / housekeeping controls');if(f)f.done=pct>=70;save();renderDashboard();calcSolve();renderExcellence();if(!silent)toast('5S score updated and linked dashboard status refreshed.')}
+function score5S(silent=false){let boxes=[...document.querySelectorAll('.fiveBox')];if(!boxes.length)return;state.fiveSChecks=boxes.map(b=>b.checked);let pct=Math.round(boxes.filter(b=>b.checked).length/boxes.length*100);$('fiveScore').textContent=pct+'%';$('fiveBar').style.width=pct+'%';$('fiveAdvice').textContent=pct>=90?'Strong workplace condition. Sustain through routine verification.':pct>=70?'Good base. Close the remaining workplace-improvement gaps.':'Priority: address obvious physical workplace and housekeeping gaps.';if(!silent){const f=state.solveChecks.find(x=>x.name==='5S / housekeeping controls');if(f)f.done=pct>=70;save();}renderDashboard();renderHomeOverview();calcSolve();renderExcellence();if(!silent)toast('5S score updated and linked dashboard status refreshed.')}
 function renderDrills(){$('drillList').innerHTML=state.drills.map((x,i)=>`<div class="item"><div><strong>${esc(x.type)} — ${esc(x.date)}</strong><small>${esc(x.desc)}</small></div><div>${statusBadge(x.status)} <button class="btn small" onclick="completeDrill(${i})">Complete</button></div></div>`).join('')}
-function addDrill(){const drill={id:nextRecordId('DRL',state.drills),type:$('dType').value,date:$('dDate').value||addDaysISO(),desc:$('dDesc').value,status:'Scheduled'};state.drills.push(drill);state.calendar.push({date:drill.date,item:drill.type+' drill',type:'Drill',owner:'ERT',status:'Planned',drillRef:drill.id});save();closeModal('drillModal');renderAll();toast('Drill scheduled and added to compliance calendar.')}
+function addDrill(){if($('dType').value==='Custom'&&!$('dTypeCustom').value.trim()){toast('Enter a custom drill type.');return;}const drill={id:nextRecordId('DRL',state.drills),type:($('dType').value==='Custom'?$('dTypeCustom').value.trim():$('dType').value),date:$('dDate').value||addDaysISO(),desc:$('dDesc').value,status:'Scheduled'};state.drills.push(drill);state.calendar.push({date:drill.date,item:drill.type+' drill',type:'Drill',owner:'ERT',status:'Planned',drillRef:drill.id});save();closeModal('drillModal');renderAll();toast('Drill scheduled and added to compliance calendar.')}
 function renderIncidents(){$('incidentRows').innerHTML=state.incidents.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.type)}</td><td>${esc(x.event)}</td><td>${esc(x.area)}</td><td>${esc(x.link)}</td><td>${statusBadge(x.status)}</td></tr>`).join('')}
 function addIncident(){let id='INC-'+String(50+state.incidents.length);state.incidents.unshift({id,type:$('iType').value,event:$('iText').value,area:$('iArea').value,link:'HIRARC + CAPA + toolbox review',status:'RCA Open'});state.actions.unshift({id:'ACT-'+String(50+state.actions.length),source:id,text:'Review controls following '+$('iType').value,owner:'Safety Supervisor',due:addDaysISO(7),status:'Open'});linkReview('Incident',$('iType').value,['Incident Investigation','HIRARC Review','Corrective Action','Toolbox Talk']);save();closeModal('incidentModal');renderAll();toast('Incident saved and linked control reviews created.');}
-function renderCalendar(){
- state.calendar.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
- $('calendarRows').innerHTML=state.calendar.map((x,i)=>`<tr><td><input type="date" value="${esc(x.date)}" onchange="setCalendarField(${i},'date',this.value)"></td><td><input value="${esc(x.item)}" onchange="setCalendarField(${i},'item',this.value)"></td><td>${esc(x.type)}</td><td><input value="${esc(x.owner)}" onchange="setCalendarField(${i},'owner',this.value)"></td><td><select onchange="setCalendarField(${i},'status',this.value)"><option ${x.status==='Planned'?'selected':''}>Planned</option><option ${x.status==='Due'?'selected':''}>Due</option><option ${x.status==='Overdue'?'selected':''}>Overdue</option><option ${x.status==='Completed'?'selected':''}>Completed</option></select></td><td><button class="btn small danger" onclick="state.calendar.splice(${i},1);save();renderAll()">Delete</button></td></tr>`).join('');
+function renderCalendar(){}
+function addEvent(){
+ const index=window.organizationCalendarEditIndex;
+ if(['Training','Assessment','Training material'].includes($('evType').value)){go('training');return;}
+ if($('evSubtype').value==='Custom'&&!$('evCustom').value.trim()){toast('Enter the custom subtype.');$('evCustom').focus();return;}
+ const values={date:$('evDate').value,time:$('evTime').value,item:$('evItem').value.trim(),type:$('evType').value,subtype:$('evSubtype').value==='Custom'?$('evCustom').value.trim():$('evSubtype').value,owner:$('evOwner').value.trim(),status:index===null||index===undefined?'Planned':$('evStatus').value};
+ if(index===null||index===undefined)state.calendar.push(values);else {if(!state.calendar[index])return;Object.assign(state.calendar[index],values);}
+ save();window.toggleOrganizationDueDate(false);renderAll();toast('Calendar entry saved.');
 }
-function addEvent(){state.calendar.push({date:$('evDate').value,item:$('evItem').value,type:$('evType').value,owner:$('evOwner').value,status:'Planned'});save();closeModal('eventModal');renderAll();toast('Compliance due date added.')}
 function renderCommittee(){$('committeeMembers').innerHTML=state.members.map((x,i)=>`<div class="item"><div><strong>${esc(x.name)}</strong><small>${esc(x.role)}</small></div><button class="btn small danger" onclick="state.members.splice(${i},1);save();renderAll()">Delete</button></div>`).join('')}
 function addMember(){state.members.push({name:$('mName').value,role:$('mRole').value});save();closeModal('memberModal');renderAll();toast('Committee member added.')}
 function analyseChange(){
@@ -559,19 +664,20 @@ function analyseChange(){
 function renderAdapt(){
  const c=state.currentChange||{type:'No changes recorded',desc:'Report a workplace change to get started.',area:'',links:[]};
  $('changeTitle').textContent=`${c.type} — ${c.area}`;$('changeReason').textContent=c.desc;$('changeFlow').innerHTML=c.links.map(x=>`<span>${x}</span>`).join('');
- $('adaptSummary').textContent=`${c.type} detected. ${c.links.length} linked OSH areas require review.`;$('adaptFlow').innerHTML=c.links.map(x=>`<span>${x}</span>`).join('');
+ if($('adaptSummary')) $('adaptSummary').textContent=`${c.type} detected. ${c.links.length} linked OSH areas require review.`;if($('adaptFlow')) $('adaptFlow').innerHTML=c.links.map(x=>`<span>${x}</span>`).join('');
  $('adaptActions').innerHTML=c.links.map(x=>`<div class="item"><div><strong>${x}</strong><small>${routeInfoFor(moduleFor(x)).why}</small></div><button class="btn small" onclick="go('${moduleFor(x)}')" type="button">Open</button></div>`).join('');
  $('changeHistory').innerHTML=state.changeHistory.slice(0,8).map(x=>`<div class="item"><div><strong>${esc(x.title)}</strong><small>${esc(x.detail)}</small></div><button class="btn small" onclick="go('adapt')" type="button">View</button></div>`).join('')
 }
 function calcSolve(){
  const solve=getSolveSnapshot();
- $('solveMgmtPct').textContent=solve.mp+'%';$('solveMgmtBar').style.width=solve.mp+'%';$('solveWorkPct').textContent=solve.wp+'%';$('solveWorkBar').style.width=solve.wp+'%';$('solveLevel').textContent=solve.level;$('solveBar').style.width=solve.overall+'%';
- let o=Math.round((solve.overall+76)/2);$('oshwaScore').textContent=o+'%';$('oshwaBar').style.width=o+'%';$('oshwaGrade').textContent=o>=85?'Documentation A · Physical A':o>=70?'Documentation B · Physical B':'Improvement required';
- $('metricStage').textContent=solve.stage;$('metricSolve').textContent='SOLVE: '+solve.level+' track';
+ $('solveMgmtPct').textContent=solve.mp+'%';$('solveMgmtBar').style.width=solve.mp+'%';$('solveWorkPct').textContent=solve.wp+'%';$('solveWorkBar').style.width=solve.wp+'%';$('solveLevel').textContent=solve.level;$('solveLevel').dataset.metal=solve.level.toLowerCase();$('solveBar').style.width=solve.overall+'%';
+ let o=Math.round(state.solveChecks.filter(x=>x.done).length/Math.max(1,state.solveChecks.length)*100);$('oshwaScore').textContent=o+'%';$('oshwaBar').style.width=o+'%';$('oshwaGrade').textContent='Internal checklist completion';
+ if($('metricStage')) $('metricStage').textContent=solve.stage;if($('metricSolve')) $('metricSolve').textContent='SOLVE: '+solve.level+' track';
  renderDashboard();
 }
-function renderSolve(){$('solveRows').innerHTML=state.solveChecks.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.element)}</td><td>${esc(x.evidence)}</td><td><input type="checkbox" ${x.done?'checked':''} onchange="toggleSolveCheckpoint(${i},this.checked)"></td></tr>`).join('');calcSolve()}
+function renderSolve(){$('solveRows').innerHTML=state.solveChecks.map((x,i)=>`<tr><td>${esc(x.name)}</td><td>${esc(x.element)}</td><td><button type="button" class="btn small" onclick="go('${moduleFor(x.evidence)}')">${esc(x.evidence)} ↗</button></td><td><input type="checkbox" ${x.done?'checked':''} onchange="toggleSolveCheckpoint(${i},this.checked)"></td></tr>`).join('');calcSolve()}
 function renderWorkerPortal(){
+ if(!$('workerLang'))return;
  const map={
   en:['Today’s safety message','Wear the required PPE, follow the approved work method, and stop work if conditions become unsafe.'],
   ms:['Mesej keselamatan hari ini','Pakai PPE yang diperlukan, ikut kaedah kerja yang diluluskan, dan hentikan kerja jika keadaan menjadi tidak selamat.'],
@@ -581,10 +687,11 @@ function renderWorkerPortal(){
   my:['ယနေ့ လုံခြုံရေး သတင်းစကား','လိုအပ်သော PPE ကို ဝတ်ဆင်ပါ၊ အတည်ပြုထားသော လုပ်ငန်းစဉ်ကို လိုက်နာပါ၊ မလုံခြုံပါက အလုပ်ကို ရပ်ပါ။'],
   fil:['Mensahe sa kaligtasan ngayon','Gamitin ang kinakailangang PPE, sundin ang aprubadong paraan ng trabaho, at huminto kapag hindi ligtas ang kondisyon.']
  };
- let v=$('workerLang').value;$('portalTitle').textContent=map[v][0];$('portalMessage').textContent=map[v][1]; if($('workerAck')) $('workerAck').checked=!!state.workerPortalAck
+ let v=$('workerLang').value;$('portalTitle').textContent=map[v][0];$('portalMessage').textContent=state.safetyMessages?.[v] || 'No safety message has been published for this language.'; if($('workerAck')) $('workerAck').checked=!!state.workerPortalAck
 }
 function submitWorkerReport(){let t=$('workerReport').value.trim();if(!t){toast('Describe the hazard or near miss first.');return}state.incidents.unshift({id:'WRK-'+String(60+state.incidents.length),type:'Worker Report',event:t,area:'Worker portal',link:'Supervisor review + HIRARC if relevant',status:'New'});linkReview('Worker hazard',t,['Incident Investigation','HIRARC Review','Corrective Action']);$('workerReport').value='';save();renderAll();toast('Worker report submitted; a linked review was created.');}
 function makeQR(){
+ if(!$('portalLinkText')||!$('qrcode'))return;
  const url=new URL('/workerportal',location.origin).href;$('portalLinkText').textContent=url;
  const box=$('qrcode');box.innerHTML='';
  if(window.QRCode&&QRCode.toCanvas){const c=document.createElement('canvas');box.appendChild(c);QRCode.toCanvas(c,url,{width:190,margin:1},err=>{if(err){box.innerHTML='<div class="qr-fallback">QR unavailable in this browser.</div>'}})}
@@ -607,11 +714,12 @@ function toggleSolveCheckpoint(i,checked){
  if(x.name==='5S / housekeeping controls'){
    state.fiveSChecks[4]=checked;
    const pct=Math.round(state.fiveSChecks.filter(Boolean).length/state.fiveSChecks.length*100);
-   x.done=pct>=70;
+   x.done=checked;
  }
  save();renderAll();toast('Maturity checkpoint and connected dashboard updated.');
 }
 function renderExcellence(){
+ renderHomeCalendar();
  const legal=legalItems(), compliant=legal.filter(x=>state.legalStatus[x.key]==='Compliant').length;
  const legalPct=Math.round(100*compliant/Math.max(1,legal.length));
  const closed=state.actions.filter(x=>x.status==='Closed').length;
@@ -619,11 +727,15 @@ function renderExcellence(){
  const sol=getSolveSnapshot().overall;
  const trainingPct=Math.round(100*state.training.filter(x=>x.status==='Completed').length/Math.max(1,state.training.length));
  const riskPct=Math.round(100*state.hirarc.filter(x=>x.status==='Current').length/Math.max(1,state.hirarc.length));
- const meetingPct=state.members.length>=4?100:0;
+ const meetingPct=Number(document.getElementById('organizationMemberTable')?.dataset.committeeCount || 0)>=4?100:0;
  const vals=[legalPct,Math.round((legalPct+meetingPct)/2),riskPct,trainingPct,Math.round((riskPct+getFiveSPct())/2),sol,actionPct];
  $('excel').querySelectorAll('[data-iso-index]').forEach((row,i)=>{const value=Math.max(0,Math.min(100,vals[i]));row.querySelector('.bar span').style.width=value+'%';row.querySelector('strong').textContent=value+'%'});
+ document.querySelectorAll('[data-home-iso-index]').forEach(row=>{const value=Math.max(0,Math.min(100,vals[Number(row.dataset.homeIsoIndex)]));row.querySelector('.bar span').style.width=value+'%';row.querySelector('.bar').setAttribute('aria-valuenow',value);row.querySelector('strong').textContent=value+'%'});
  const awards=[Math.round((legalPct+meetingPct)/2),Math.round((riskPct+actionPct)/2),Math.min(100,trainingPct+(state.workerPortalAck?10:0)),Math.round((sol+actionPct)/2)];
+ renderHomeTodos(state, vals.some(value=>value<100)||awards.some(value=>value<75));
+ if($('homeSolve'))$('homeSolve').textContent=sol+'%';if($('homeIso'))$('homeIso').textContent=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)+'%';if($('homeExcellence'))$('homeExcellence').textContent=awards.filter(n=>n>=75).length+' / 4';
  awards.forEach((n,i)=>{const e=$('awardStatus'+i);if(!e)return;e.textContent=n>=75?'Ready':n>=50?'Improve':'Gap';e.className='badge '+(n>=75?'green':n>=50?'amber':'red')});
+ document.querySelectorAll('[data-home-award-index]').forEach(e=>{const n=awards[Number(e.dataset.homeAwardIndex)];e.textContent=n>=75?'Ready':n>=50?'Improve':'Gap';e.className='badge '+(n>=75?'green':n>=50?'amber':'red')});
 }
 function openEvidenceIndex(){
  const li=legalItems(),comp=li.filter(x=>state.legalStatus[x.key]==='Compliant').length;
@@ -638,7 +750,7 @@ function openEvidenceIndex(){
  $('evidenceIndex').innerHTML=groups.map(([name,num,mod])=>`<div class="item"><div><strong>${name}</strong><small>${num}</small></div><button class="btn small" onclick="closeModal('evidenceModal');go('${mod}')">Open module ↗</button></div>`).join('');
  openModal('evidenceModal');
 }
-function savePolicyDraft(){state.policyDraft=$('policyText').value;save();toast('Policy draft saved locally; employer approval is still required.')}
+function savePolicyDraft(){state.policyDraft=$('policyText').value;save();renderAll();toast('Policy draft saved locally; employer approval is still required.')}
 function saveMeetingPlan(){
  const cm=$('committee');const date=cm.querySelector('input[type="date"]')?.value||addDaysISO(14);
  const inputs=[...cm.querySelectorAll('input')];const venue=inputs.find(e=>e.type==='text')?.value||'Meeting room';
@@ -648,12 +760,7 @@ function saveMeetingPlan(){
  else state.calendar.push({date,item:'Safety & Health Committee meeting',type:'Committee',owner:'OSH Coordinator',status:'Planned',meetingPlan:true});
  save();renderAll();toast('Meeting plan saved and calendar updated.')
 }
-function saveJMS(){
- const sec=$('hirarc');const inputs=[...sec.querySelectorAll('input,textarea')].filter(el=>!el.closest('.modal'));
- state.jmsDraft=inputs.map(x=>({id:x.id,value:x.value}));
- linkReview('JMS updated','Job method statement',['HIRARC','Training']);
- save();renderAll();toast('JMS saved; linked HIRARC review and due date created.')
-}
+function saveJMS(){for(const id of ['jmsActivity','jmsPreparedBy','jmsSteps']){const field=$(id);if(!field.value.trim()){field.reportValidity();field.focus();return;}}const steps=$('jmsSteps').value.split(/\r?\n/).map(step=>step.trim()).filter(Boolean);state.jms.push({id:crypto.randomUUID(),activity:$('jmsActivity').value.trim(),preparedBy:$('jmsPreparedBy').value.trim(),steps});save();closeModal('jmsModal');for(const id of ['jmsActivity','jmsPreparedBy','jmsSteps']) $(id).value='';renderAll();toast('JMS saved. You can now assess its job steps.');}
 
 
 /* Automatic daily Fresh-Grad Mentor: 21 reviewed, offline lessons. */
@@ -668,12 +775,12 @@ function mentorLang(en,ms){return currentLanguage==='ms'?ms:en}
 function markMentorDone(done){const key=mentorLocalDate();state.mentorCompletedDays=Array.isArray(state.mentorCompletedDays)?state.mentorCompletedDays:[];state.mentorCompletedDays=state.mentorCompletedDays.filter(x=>x!==key);if(done)state.mentorCompletedDays.push(key);state.mentorCompletedDays=state.mentorCompletedDays.slice(-365);save();renderDailyMentor()}
 function toggleTodayLesson(){dailyMentorExpanded=!dailyMentorExpanded;renderDailyMentor()}
 function renderDailyMentor(){
- const el=$('mentorDailyExample');if(!el)return;
+ const el=$('mentorDailyExample');if(!$('mentorDailyLesson'))return;
  const key=mentorLocalDate();if(key!==dailyMentorRenderedDate){dailyMentorExpanded=false;dailyMentorRenderedDate=key}
  const example=dailyMentorExample(),lesson=dailyMentorLesson();
  const ms=currentLanguage==='ms';
- $('mentorDailyDate').textContent=new Date().toLocaleDateString(ms?'ms-MY':'en-MY',{day:'numeric',month:'short'});
- el.innerHTML=`<h5 class="mentor-topic">${esc(mentorLang(example.title,example.msTitle))}</h5><p><strong>${ms?'Situasi':'Scenario'}:</strong> ${esc(mentorLang(example.scenario,example.msScenario))}</p><p><strong>${ms?'Elakkan':'Avoid'}:</strong> ${esc(mentorLang(example.avoid,example.msAvoid))}</p><p><strong>${ms?'Pemikiran yang betul':'Better mindset'}:</strong> ${esc(mentorLang(example.steps,example.msSteps))}</p>`;
+ if($('mentorDailyDate')) $('mentorDailyDate').textContent=new Date().toLocaleDateString(ms?'ms-MY':'en-MY',{day:'numeric',month:'short'});
+ if(el) el.innerHTML=`<h5 class="mentor-topic">${esc(mentorLang(example.title,example.msTitle))}</h5><p><strong>${ms?'Situasi':'Scenario'}:</strong> ${esc(mentorLang(example.scenario,example.msScenario))}</p><p><strong>${ms?'Elakkan':'Avoid'}:</strong> ${esc(mentorLang(example.avoid,example.msAvoid))}</p><p><strong>${ms?'Pemikiran yang betul':'Better mindset'}:</strong> ${esc(mentorLang(example.steps,example.msSteps))}</p>`;
  $('mentorDailyLesson').innerHTML=`<h5 class="mentor-topic">${esc(mentorLang(lesson.title,lesson.msTitle))}</h5><p>${esc(mentorLang(lesson.summary,lesson.msSummary))}</p><p class="note">${ms?'Pelajaran hari ini dikemas kini secara automatik.':'Today’s lesson changes automatically with your calendar date.'}</p>`;
  const done=(state.mentorCompletedDays||[]).includes(key);
  $('mentorDoneToday').checked=done;
@@ -682,13 +789,39 @@ function renderDailyMentor(){
  const detail=$('mentorLessonExpanded');detail.hidden=!dailyMentorExpanded;
  detail.innerHTML=dailyMentorExpanded?`<strong>${ms?'Langkah pembelajaran':'Learning steps'}</strong><ol>${mentorLang(lesson.steps,lesson.msSteps).map(st=>`<li>${esc(st)}</li>`).join('')}</ol><p class="note">${ms?'Gunakan modul berkaitan dalam aplikasi untuk latihan.':'Use the related module for practical application.'}</p>`:'';
  const pos=mentorDailyIndex()+1;
- $('mentorDailyNote').textContent=ms?`Pelajaran dan contoh berubah secara automatik mengikut tarikh peranti (hari ${pos} daripada ${DAILY_LESSONS.length}). Kandungan pendidikan tersedia dalam fail dan berulang selepas ${DAILY_LESSONS.length} hari; tiada maklumat undang-undang baharu dimuat turun.`:`Automatic daily rotation · lesson ${pos} of ${DAILY_LESSONS.length} · changes at the next local calendar day. Curated offline examples repeat after ${DAILY_LESSONS.length} days. No live legislative/news updates are fetched.`;
+ if($('mentorDailyNote')) $('mentorDailyNote').textContent=ms?`Pelajaran dan contoh berubah secara automatik mengikut tarikh peranti (hari ${pos} daripada ${DAILY_LESSONS.length}). Kandungan pendidikan tersedia dalam fail dan berulang selepas ${DAILY_LESSONS.length} hari; tiada maklumat undang-undang baharu dimuat turun.`:`Automatic daily rotation · lesson ${pos} of ${DAILY_LESSONS.length} · changes at the next local calendar day. Curated offline examples repeat after ${DAILY_LESSONS.length} days. No live legislative/news updates are fetched.`;
 }
 setInterval(()=>{if(mentorLocalDate()!==dailyMentorRenderedDate)renderDailyMentor()},30000);
 
+function renderHomeOverview(){
+ if (!$('homeOverview')) return;
+ const set=(id,text,attention=false)=>{const el=$(id);el.textContent=text;el.parentElement.parentElement.classList.toggle('needs-attention',attention)};
+ const profile=state.profile;
+ const profileReady=Boolean(profile.company && profile.industry && profile.site && Number(profile.employees)>0);
+ set('homeProfileStatus',profileReady?'Details recorded':'Complete workplace details',!profileReady);
+ const gaps=legalItems().filter(item=>(state.legalStatus[item.key]||'Not assessed')!=='Compliant').length;
+ set('homeLegalStatus',gaps?`${gaps} requirement${gaps===1?'':'s'} to review`:'All listed requirements marked compliant',gaps>0);
+ set('homeCommitteeStatus',state.members.length?`${state.members.length} member${state.members.length===1?'':'s'} recorded`:'No members recorded · check applicability',!state.members.length);
+ set('homeHirarcStatus',state.hirarc.length?`${state.hirarc.length} assessment row${state.hirarc.length===1?'':'s'} recorded`:'No assessment rows recorded',!state.hirarc.length);
+ const hraKeys=['prisma',...['noise','chemical','ergo','iaq'].filter(key=>profile[key])];
+ const hraGaps=hraKeys.filter(key=>(state.legalStatus[key]||'Not assessed')!=='Compliant').length;
+ set('homeHraStatus',hraGaps?`${hraGaps} triggered pathway${hraGaps===1?'':'s'} to review`:'Triggered pathways marked compliant',hraGaps>0);
+ const open=state.actions.filter(action=>action.status!=='Closed');
+ const overdue=open.filter(action=>action.status==='Overdue').length;
+ set('homeControlStatus',`${open.length} open action${open.length===1?'':'s'}${overdue?` · ${overdue} overdue`:''}`,open.length>0);
+ set('homeFiveSStatus',`${getFiveSPct()}% of checklist complete`,getFiveSPct()<100);
+ const fivePct=getFiveSPct();
+ const fiveGaps=fiveItems.filter((item,index)=>!state.fiveSChecks[index]);
+ $('homeFiveSBar').style.width=`${fivePct}%`;
+ $('homeFiveSProgress').setAttribute('aria-valuenow',fivePct);
+ $('homeFiveSGaps').hidden=fiveGaps.length===0;
+ $('homeFiveSItems').innerHTML=fiveGaps.map(item=>`<li>${esc(item)}</li>`).join('');
+ const remaining=state.solveChecks.filter(check=>!check.done).length;
+ set('homeSolveStatus',remaining?`${remaining} checkpoint${remaining===1?'':'s'} to review`:'All checkpoints completed',remaining>0);
+}
 function renderAll(){
  $('companyLine').textContent=localizedCompanyLine();
- syncProfileInputs();if(state.policyDraft&&$('policyText'))$('policyText').value=state.policyDraft;buildLegal();generateNextSteps();renderDashboard();renderMatrix();renderHirarc();renderHRA();renderActions();renderWorkers();renderEquipment();renderChemicals();renderTraining();renderToolbox();renderPtw();render5S();renderDrills();renderIncidents();renderCalendar();renderCommittee();renderAdapt();renderSolve();renderWorkerPortal();renderDashboardCalendar();renderExcellence();renderDailyMentor()
+ syncProfileInputs();if(state.committeePlan){if($('meetingDate'))$('meetingDate').value=state.committeePlan.date||'';const venue=document.querySelector('#committee .form-grid input:not([type=date])');if(venue)venue.value=state.committeePlan.venue||'';}for(const field of state.jmsDraft||[]){if($(field.id))$(field.id).value=field.value;}if(state.policyDraft&&$('policyText'))$('policyText').value=state.policyDraft;buildLegal();generateNextSteps();renderDashboard();renderMatrix();renderHirarc();renderHRA();renderActions();renderWorkers();renderEquipment();renderChemicals();renderTraining();renderToolbox();renderPtw();render5S();renderDrills();renderIncidents();renderCalendar();renderCommittee();renderAdapt();renderSolve();renderWorkerPortal();renderDashboardCalendar();renderExcellence();renderDailyMentor();renderHomeOverview();renderHRA();window.renderSafetyRecords?.()
 }
 $('uiLang').addEventListener('change',e=>{
  currentLanguage=e.target.value==='ms'?'ms':'en';state.uiLang=currentLanguage;save();
@@ -710,4 +843,25 @@ initLanguageObserver();
 applyLanguage();
 
 
-Object.assign(window, { state, localizedCompanyLine, translateText, applyLanguage, initLanguageObserver, save, go, openModal, closeModal, toast, statusBadge, riskScore, riskBand, officialLink, syncProfileInputs, validateCompanyData, workplaceCompanyData, applyCompanyData, saveProfile, openCompanyEditor, saveCompanyDetails, legalItems, buildLegal, generateNextSteps, getFiveSPct, getSolveSnapshot, renderDashboard, renderMatrix, moduleFor, routeInfoFor, inferTargetFromText, priorityTarget, openPriority, addDaysISO, nextRecordId, linkReview, completeLinkedAction, completeTraining, completeDrill, addTrainingCalendar, createCalendarFromEquipment, createCalendarFromAction, closeCalendarLinked, setCalendarField, changeCalMonth, dateISO, renderDashboardCalendar, esc, renderHirarc, addHirarc, renderHRA, renderActions, addAction, renderWorkers, addWorker, renderEquipment, addEquipment, renderChemicals, addChemical, renderTraining, addTraining, useToolboxTopic, renderToolbox, generateToolbox, renderPtw, addPtw, render5S, score5S, renderDrills, addDrill, renderIncidents, addIncident, renderCalendar, addEvent, renderCommittee, addMember, analyseChange, renderAdapt, calcSolve, renderSolve, renderWorkerPortal, submitWorkerReport, makeQR, mentorExplain, toggleSolveCheckpoint, renderExcellence, openEvidenceIndex, savePolicyDraft, saveMeetingPlan, saveJMS, mentorLocalDate, mentorDailyIndex, dailyMentorExample, dailyMentorLesson, mentorLang, markMentorDone, toggleTodayLesson, renderDailyMentor, renderAll });
+Object.assign(window, { state, localizedCompanyLine, translateText, applyLanguage, initLanguageObserver, save, go, openModal, closeModal, toast, statusBadge, riskScore, riskBand, officialLink, syncProfileInputs, validateCompanyData, workplaceCompanyData, applyCompanyData, saveProfile, openCompanyEditor, saveCompanyDetails, legalItems, buildLegal, generateNextSteps, getFiveSPct, getSolveSnapshot, renderDashboard, renderMatrix, moduleFor, routeInfoFor, inferTargetFromText, priorityTarget, openPriority, addDaysISO, nextRecordId, linkReview, completeLinkedAction, completeTraining, completeDrill, addTrainingCalendar, createCalendarFromEquipment, createCalendarFromAction, closeCalendarLinked, setCalendarField, changeCalMonth, dateISO, renderDashboardCalendar, esc, renderHirarc, openHirarc, addHirarc, renderHRA, renderActions, addAction, renderWorkers, addWorker, renderEquipment, addEquipment, renderChemicals, addChemical, renderTraining, addTraining, useToolboxTopic, renderToolbox, generateToolbox, renderPtw, addPtw, render5S, score5S, renderDrills, addDrill, renderIncidents, addIncident, renderCalendar, addEvent, renderCommittee, addMember, analyseChange, renderAdapt, calcSolve, renderSolve, renderWorkerPortal, submitWorkerReport, makeQR, mentorExplain, toggleSolveCheckpoint, renderExcellence, openEvidenceIndex, savePolicyDraft, saveMeetingPlan, saveJMS, mentorLocalDate, mentorDailyIndex, dailyMentorExample, dailyMentorLesson, mentorLang, markMentorDone, toggleTodayLesson, renderDailyMentor, renderAll });
+function renderHomeCalendar(){
+ const grid=document.getElementById('homeCalendarGrid'),agenda=document.getElementById('homeCalendarAgenda'),monthInput=document.getElementById('homeCalendarMonth');if(!grid)return;
+ if(!monthInput.value)monthInput.value=new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+ const [year,month]=monthInput.value.split('-').map(Number);const events=[];
+ const add=(date,title,source,time='')=>{if(/^\d{4}-\d{2}-\d{2}$/.test(date||''))events.push({date,title,source,time});};
+ for(const x of state.calendar)add(x.date,x.item,x.type||'Calendar',x.time||'');
+ for(const x of state.actions)add(x.due,x.text,'Corrective action');
+ for(const x of state.training)add(x.due,x.what,'Training');
+ for(const x of state.equipment)add(x.date,x.name,'Equipment');
+ for(const x of state.drills)add(x.date,x.type,'Drill');
+ for(const x of state.permits)add(x.until||x.date,x.type,'Permit');
+ for(const x of state.linkedReviews)add(x.due,x.label,'Review');
+ for(const [name,x] of Object.entries(state.assessments||{}))add(x.due,name,'Assessment');
+ const unique=[...new Map(events.map(x=>[x.date+'|'+(x.time||'')+'|'+x.title,x])).values()].sort((a,b)=>a.date.localeCompare(b.date));
+ grid.replaceChildren();for(const day of ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']){const label=document.createElement('strong');label.textContent=day;grid.append(label);}
+ const offset=(new Date(year,month-1,1).getDay()+6)%7;
+ for(let i=0;i<42;i++){const date=new Date(year,month-1,1-offset+i),iso=dateISO(date),items=unique.filter(x=>x.date===iso),cell=document.createElement('button');cell.type='button';cell.className='home-calendar-day'+(date.getMonth()!==month-1?' outside':'');cell.textContent=date.getDate();cell.title=items.map(x=>x.title).join('\n')||'No scheduled items';if(items.length){const badge=document.createElement('small');badge.textContent=items.length+' items';cell.append(badge);}cell.addEventListener('click',()=>renderAgenda(unique.filter(x=>x.date===iso)));grid.append(cell);}
+ function renderAgenda(items){agenda.replaceChildren();if(!items.length){const empty=document.createElement('p');empty.className='note';empty.textContent='No scheduled items for this period.';agenda.append(empty);}for(const x of items){const row=document.createElement('div');row.className='item';const title=document.createElement('strong');title.textContent=x.title;const detail=document.createElement('small');detail.textContent=x.date+' · '+(x.time||'All day')+' · '+x.source;row.append(title,detail);agenda.append(row);}}
+ renderAgenda(unique.filter(x=>x.date.startsWith(monthInput.value)));
+}
+document.getElementById('homeCalendarMonth')?.addEventListener('change',renderHomeCalendar);

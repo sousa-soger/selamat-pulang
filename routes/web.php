@@ -3,7 +3,11 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\GovernanceController;
+use App\Http\Controllers\HraDocumentController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\TrainingMaterialController;
+use App\Http\Controllers\WorkerPortalController;
 use App\Http\Controllers\WorkspaceController;
 use App\Models\Organization;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +26,18 @@ Route::middleware('guest')->group(function () {
 });
 Route::post('/stripe/webhook', [BillingController::class, 'webhook'])->name('stripe.webhook');
 Route::middleware('auth')->group(function () {
+ Route::post('/organizations/{organization}/safety-attachments',[\App\Http\Controllers\SafetyAttachmentController::class,'store'])->middleware('throttle:20,1')->name('safety-attachments.store');
+ Route::get('/organizations/{organization}/safety-attachments/{document}',[\App\Http\Controllers\SafetyAttachmentController::class,'download'])->name('safety-attachments.download');
+    Route::post('/organizations/{organization}/materials', [TrainingMaterialController::class, 'store'])->middleware('throttle:20,1')->name('materials.store');
+    Route::post('/organizations/{organization}/materials/{material}/complete', [TrainingMaterialController::class, 'complete'])->middleware('throttle:30,1')->name('materials.complete');
+    Route::get('/organizations/{organization}/materials/{material}/{document}', [TrainingMaterialController::class, 'download'])->name('materials.download');
+    Route::post('/organizations/{organization}/governance', [GovernanceController::class, 'store'])->middleware('throttle:20,1')->name('governance.store');
+    Route::get('/organizations/{organization}/governance/{document}', [GovernanceController::class, 'download'])->name('governance.download');
+    Route::post('/organizations/{organization}/portal', [WorkerPortalController::class, 'store'])->middleware('throttle:30,1')->name('portal.store');
+    Route::post('/organizations/{organization}/hra/documents', [HraDocumentController::class, 'store'])->middleware('throttle:10,1')->name('hra.documents.store');
+    Route::get('/organizations/{organization}/hra/documents/{document}', [HraDocumentController::class, 'download'])->name('hra.documents.download');
+    Route::get('/organizations/{organization}/workspace', [WorkspaceController::class, 'show'])->name('workspace.show');
+    Route::patch('/organizations/{organization}/members/{user}/role', [OrganizationController::class, 'updateMemberRole'])->name('organizations.members.role');
     Route::patch('/organizations/{organization}', [OrganizationController::class, 'update'])->name('organizations.update');
     Route::patch('/admin/users/{user}/organization-permission', [AdminController::class, 'setOrganizationPermission'])->name('admin.users.organization-permission');
     Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
@@ -43,6 +59,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/account/certificate', [AccountController::class, 'certificate'])->middleware('throttle:10,1')->name('certificates.store');
         Route::post('/organizations', [OrganizationController::class, 'store'])->middleware('throttle:10,1')->name('organizations.store');
         Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
+        Route::delete('/organizations/{organization}', [OrganizationController::class, 'destroy'])->name('organizations.destroy');
         Route::post('/organizations/{organization}/members', [OrganizationController::class, 'addMember'])->name('organizations.members.store');
         Route::delete('/organizations/{organization}/members/{user}', [OrganizationController::class, 'removeMember'])->name('organizations.members.destroy');
         Route::post('/organizations/{organization}/checkout', [BillingController::class, 'checkout'])->middleware('throttle:6,1')->name('organizations.checkout');
@@ -55,7 +72,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/{screen?}', function (string $screen = 'dashboard') {
-    $aliases = ['profile' => 'workplace', 'health' => 'hra', 'languages' => 'workerportal', 'oshwa' => 'solve'];
+    $aliases = ['committee' => 'organization', 'emergency' => 'organization', 'capa' => 'organization', 'personal' => 'learning', 'mentor' => 'learning', 'calendar' => 'organization', 'workplace' => 'organization', 'profile' => 'organization', 'health' => 'hra', 'languages' => 'workerportal', 'oshwa' => 'solve'];
     if (isset($aliases[$screen])) {
         return redirect('/'.$aliases[$screen]);
     }
@@ -64,6 +81,12 @@ Route::get('/{screen?}', function (string $screen = 'dashboard') {
     abort_unless(isset($screens[$screen]), 404);
 
     $organization = Organization::find(session('organization_id'));
+    if (! $organization) {
+        $organization = auth()->user()->organizations()->first();
+        if ($organization) {
+            session()->put('organization_id', $organization->id);
+        }
+    }
     if ($organization && ! $organization->canManage(auth()->user()) && ! $organization->users()->whereKey(auth()->id())->exists()) {
         session()->forget('organization_id');
         $organization = null;

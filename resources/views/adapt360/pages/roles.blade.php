@@ -1,13 +1,15 @@
-@verbatim
-
-<div class="hero"><div><h1>Policy &amp; Roles</h1><p>Generate the basic governance layer: OSH policy, appointment responsibilities and worker participation roles.</p></div></div>
-<div class="grid g2">
-<div class="card"><h4>OSH policy generator</h4><textarea id="policyText" placeholder="Write your organization’s OSH policy"></textarea><div class="toolbar"><span class="note">Draft / employer approval required.</span><button type="button" class="btn" onclick="savePolicyDraft()">Save draft</button></div></div>
-<div class="card"><h4>Role setup</h4><div class="list">
-<div class="item"><div><strong>Employer / Top Management</strong><small>Approves policy, resources and management review.</small></div><span class="badge green">Assigned</span></div>
-<div class="item"><div><strong>OSH Coordinator</strong><small>Runs profile, legal register, risk assessment, records and follow-up.</small></div><span class="badge green">Assigned</span></div>
-<div class="item"><div><strong>Supervisors</strong><small>Inspections, toolbox talks, incident reporting and task controls.</small></div><span class="badge blue">3 users</span></div>
-</div></div>
-</div>
-
-@endverbatim
+<div class="hero"><div><div class="eyebrow">Organization governance</div><h1>Policy &amp; roles</h1><p>Review responsibilities and policies, propose changes, and keep supporting documents together.</p></div></div>
+@if($organization)
+@php
+$register=json_decode($organization->governance_data ?? '{}',true) ?: ['entries'=>[],'requests'=>[]];
+$legacy=json_decode($organization->workspace_data ?? '{}',true) ?: [];
+$defaults=['osh-policy'=>['kind'=>'policy','title'=>'Occupational safety and health policy','subtitle'=>'Employer approval required','description'=>$legacy['policyDraft'] ?? 'Define the organization’s commitment to safe and healthy work, prevention, consultation and continual improvement. Replace this guidance with your approved policy.'],'management-role'=>['kind'=>'role','title'=>'Employer / Top Management','subtitle'=>'Leadership and resources','description'=>'Approves the policy, provides resources and reviews performance.'],'coordinator-role'=>['kind'=>'role','title'=>'OSH Coordinator','subtitle'=>'Coordination and follow-up','description'=>'Coordinates the organization profile, legal register, risk assessments, records and follow-up.'],'supervisor-role'=>['kind'=>'role','title'=>'Supervisors','subtitle'=>'Daily operational supervision','description'=>'Coordinates inspections, toolbox talks, incident reporting and task controls.']];
+foreach($defaults as $id=>$template)if(!isset($register['entries'][$id]))$register['entries'][$id]=$template+['id'=>$id,'revision'=>0,'attachments'=>[]];
+$reviewer=$organization->canEdit(auth()->user());
+@endphp
+@if(session('status'))<p role="status" class="portal-notice">{{ session('status') }}</p>@endif
+@if($errors->any())<div role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
+<section class="card governance-step"><div class="eyebrow">Step 1</div><h2>Review policies &amp; responsibilities</h2><p class="note">Starter entries are guidance until your organization publishes its own version.</p><div class="governance-entries">@foreach($register['entries'] as $entry)<article class="governance-entry"><div class="toolbar"><span class="badge blue">{{ ucfirst($entry['kind']) }}</span><span class="note">{{ ($entry['revision'] ?? 0) ? 'Revision '.$entry['revision'] : 'Starter template' }}</span></div><h3>{{ $entry['title'] }}</h3><p class="note">{{ $entry['subtitle'] }}</p><p class="portal-message">{{ $entry['description'] }}</p>@foreach($entry['attachments'] ?? [] as $attachment)<a class="governance-attachment" href="{{ route('governance.download',[$organization,$attachment['id']]) }}">{{ $attachment['name'] }} ↧</a>@endforeach @if(isset($entry['author']))<p class="note">Published by {{ $entry['author'] }}</p>@endif<details><summary class="btn small">{{ $reviewer ? 'Update or propose change' : 'Request an update' }}</summary>@include('adapt360.governance-form',['entry'=>$entry])</details></article>@endforeach</div></section>
+<section class="card governance-step"><div class="eyebrow">Step 2</div><h2>Add a missing policy or role</h2><details><summary class="btn primary">+ New policy or role</summary>@include('adapt360.governance-form',['entry'=>null])</details></section>
+<section class="card governance-step"><div class="eyebrow">Step 3</div><h2>Change requests</h2><p class="note">Owners and editors approve or reject requests. Approved changes become the published entry.</p>@forelse(array_reverse($register['requests']) as $proposal)<article class="governance-entry"><div class="toolbar"><h3>{{ $proposal['entry']['title'] }}</h3><span class="badge blue">{{ $proposal['status'] }}</span></div><p class="note">Requested by {{ $proposal['author'] }} · {{ $proposal['entry']['subtitle'] }}</p><p class="portal-message">{{ $proposal['entry']['description'] }}</p>@foreach($proposal['entry']['attachments'] ?? [] as $attachment)<a class="governance-attachment" href="{{ route('governance.download',[$organization,$attachment['id']]) }}">{{ $attachment['name'] }} ↧</a>@endforeach @if($reviewer && $proposal['status']==='Pending')<form method="post" action="{{ route('governance.store',$organization) }}">@csrf<input type="hidden" name="id" value="{{ $proposal['id'] }}"><button class="btn primary small" name="action" value="approve">Approve &amp; publish</button><button class="btn small" name="action" value="reject">Reject</button></form>@endif @if(isset($proposal['reviewer']))<p class="note">Reviewed by {{ $proposal['reviewer'] }}</p>@endif</article>@empty<p class="portal-empty">No change requests yet.</p>@endforelse</section>
+@endif

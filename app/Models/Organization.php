@@ -15,7 +15,7 @@ class Organization extends Model
 
     protected function casts(): array
     {
-        return ['admin_provisioned' => 'boolean', 'checkout_expires_at' => 'datetime'];
+        return ['workspace_version' => 'integer', 'admin_provisioned' => 'boolean', 'checkout_expires_at' => 'datetime'];
     }
 
     public function owner(): BelongsTo
@@ -25,7 +25,12 @@ class Organization extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->withTimestamps();
+        return $this->belongsToMany(User::class)->withPivot('role', 'committee_role')->withTimestamps();
+    }
+
+    public function canEdit(User $user): bool
+    {
+        return $this->canManage($user) || $this->users()->whereKey($user->id)->wherePivot('role', 'editor')->exists();
     }
 
     public function hasAccess(): bool

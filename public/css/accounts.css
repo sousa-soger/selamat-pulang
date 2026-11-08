@@ -74,7 +74,7 @@
 .admin-create{margin:24px 0}
 .accounts :focus-visible{outline:2px solid #6d67e8;outline-offset:3px}
 .accounts ::selection{background:#ddd9ff;color:#1e1b4b}
-@keyframes account-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes account-enter{from{transform:translateY(8px)}to{transform:translateY(0)}}
 @media(prefers-reduced-motion:no-preference){.auth-intro,.auth-form{animation:account-enter .45s ease-out both}.auth-form{animation-delay:.06s}}
 @media(max-width:1100px){.account-main{padding:32px}.auth-layout{gap:36px;grid-template-columns:minmax(0,1fr) minmax(340px,1fr)}.auth-intro{padding:36px 28px}.auth-intro h1{font-size:36px}.account-footer{margin:0 32px}}
 @media(max-width:800px){.account-header{padding:20px 24px}.auth-layout{grid-template-columns:1fr;gap:28px;min-height:auto;max-width:480px;margin:auto}.auth-intro{padding:28px;min-height:200px}.auth-intro h1{font-size:32px;margin:15px 0}.auth-intro>p{margin:0;font-size:13px}.intro-detail{display:none}.auth-form.panel{padding:0 4px 12px}.account-grid,.review-row{grid-template-columns:1fr}.account-main{padding:28px 24px}.account-header img{width:125px}.account-header nav{gap:14px;font-size:12px}.page-heading h1{font-size:28px}.panel{padding:24px}.account-footer{margin:0 24px}.section-heading{align-items:flex-start;flex-wrap:wrap}}
@@ -88,7 +88,7 @@
 .account-workspace .account-main{max-width:1300px;width:100%;padding:36px;margin:0 auto;min-height:calc(100dvh - 150px)}
 .account-workspace .account-footer{margin:0 36px;max-width:none}
 .account-workspace .sidebar a{color:#c2c2ce}
-.account-workspace .sidebar a[aria-current=page]{color:#fff;background:#312e5c}
+
 .account-workspace .sidebar .account strong{color:#f4f4f5}
 .account-workspace .sidebar .account small{color:#bcbcc8}
 .account-workspace .sidebar .avatar{background:#312e5c;color:#c7d2fe}
@@ -117,3 +117,8 @@
 /* Use the same full workspace wash as the main application pages. */
 .account-workspace .account-main { background: transparent; position: relative; z-index: 1; }
 .account-workspace .account-footer { position: relative; z-index: 1; }
+.account-workspace .account-main{max-width:1440px}.account-workspace .page-heading{padding:4px 0 24px;border-bottom:1px solid #e5e7eb}.account-workspace .panel{padding:28px;box-shadow:0 2px 6px #11182704}.account-workspace .panel>h2{font-size:20px}.account-workspace details{border-bottom:1px solid #eef0f4;padding:16px 0}.account-workspace details>summary{cursor:pointer;font-size:13px;font-weight:500;padding:8px 4px;list-style:none;display:flex;align-items:center;gap:10px}.account-workspace details>summary::before{content:'›';font-size:20px;color:#818cf8;transition:transform .2s}.account-workspace details[open]>summary::before{transform:rotate(90deg)}.account-workspace details form{padding:12px 16px;background:#f9fafb;border-radius:8px;margin-top:12px}.account-workspace select{padding:9px 12px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font:inherit}.account-workspace .list-row>div{flex:1;min-width:0}.account-button.danger{color:#b42318;border-color:#fecaca;background:#fff7f7}.account-workspace .sidebar details{padding:0;border:0}.account-workspace .sidebar details>summary{font-size:13px;padding:9px 10px}.account-workspace .sidebar details>summary::before{display:none}
+/* The ambient canvas belongs to the entire login page, not its bounded content. */
+.accounts:not(.account-workspace){background:radial-gradient(ellipse 900px 600px at 100% 0,rgba(6,182,212,.055),transparent 75%),#fff}
+.accounts:not(.account-workspace) .account-main{background:transparent}
+.admin-directory{align-items:start;margin-bottom:28px!important}.directory-count{font:12px 'JetBrains Mono',monospace;background:#eef2ff;color:#4f46e5;padding:5px 9px;border-radius:6px;margin-left:8px;vertical-align:middle}.account-workspace .directory-person{display:flex;gap:14px;align-items:center;padding:12px 0}.account-workspace .directory-person::before{display:none}.directory-avatar{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;background:#eef2ff;color:#4f46e5;border-radius:10px;font-size:15px}.directory-copy{display:flex;flex-direction:column;min-width:0;flex:1}.directory-copy strong{font-size:13px;font-weight:600}.accounts .directory-copy small{margin-top:3px;color:#6b7280;font-size:12px;overflow-wrap:anywhere}.directory-chevron{color:#6b7280;transition:transform .2s}.account-workspace details[open] .directory-chevron{transform:rotate(180deg)}.admin-directory .list-row{align-items:flex-start;gap:12px;padding:8px 0}.admin-directory .list-row>.status{margin-top:26px}.admin-directory details{border:0!important;padding:0!important}.organization-controls{margin-top:28px}.organization-controls details+details{margin-top:4px}.organization-fields{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}.organization-information{margin-bottom:24px}.organization-information h2{margin-bottom:6px}.organization-field input{background:#fff!important}.account-workspace .organization-information form{margin-top:20px}@media(max-width:800px){.organization-fields{grid-template-columns:1fr}.admin-directory .list-row{flex-wrap:wrap}.admin-directory .list-row>.status{margin-top:0}}

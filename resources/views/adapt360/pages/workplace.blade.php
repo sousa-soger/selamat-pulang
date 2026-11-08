@@ -1,6 +1,6 @@
 @verbatim
 
-<div class="hero"><div><h1>Workplace Profile</h1><p>Your workplace profile it determines which Malaysian OSH requirements may apply and gives the Adapt Engine a baseline for future changes.</p></div><button type="button" class="btn primary" onclick="saveProfile()">Save &amp; recalculate system</button></div>
+<div class="hero"><div><h1>Workplace Profile</h1><p>Your workplace profile determines which Malaysian OSH requirements may apply and gives the Adapt Engine a baseline for future changes.</p></div><button type="button" class="btn primary" onclick="saveProfile()">Save workplace profile</button></div>
 <div class="card">
 <div class="form-grid">
 <div><label for="companyName">Company name *</label><input id="companyName" value="Maju Engineering Sdn. Bhd." autocomplete="organization" required></div>
@@ -27,7 +27,7 @@
 <label class="check"><input id="fHeight" type="checkbox"> Work at height</label>
 <label class="check"><input id="fConfined" type="checkbox"> Confined space</label>
 </div>
-<div class="callout tealish"><strong>Editable company profile:</strong> change the fields above, then tap <strong>Save &amp; recalculate system</strong>. Saving this profile rebuilds the applicability register, HRA tracker, next-step queue and selected operational controls. Your updates are saved in this browser.</div>
+<div class="callout tealish"><strong>Editable company profile:</strong> change the fields above, then tap <strong>Save workplace profile</strong>. Saving this profile rebuilds the applicability register, HRA tracker, next-step queue and selected operational controls. Check the workspace save status above to confirm your changes have been saved.</div>
 </div>
 
 @endverbatim

@@ -1,3 +1,4 @@
+import '../css/auralis.css';
 import { createIcons, icons } from 'lucide';
 import { gsap } from 'gsap';
 

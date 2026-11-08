@@ -247,8 +247,61 @@ class AccountAccessTest extends TestCase
     {
         $admin = $this->admin();
         foreach (['/', '/account', '/admin'] as $path) {
-            $this->actingAs($admin)->get($path)->assertOk()->assertSee('Special Access')->assertSee('Compliance calendar')->assertSee('Workplace profile')->assertSee('id="sidebar"', false);
+            $this->actingAs($admin)->get($path)->assertOk()->assertSee('Special Access')->assertSee('Organization')->assertDontSee('href="/workplace"', false)->assertSee('id="sidebar"', false);
         }
         $this->actingAs(User::factory()->create())->get('/account')->assertOk()->assertDontSee('Special Access');
+    }
+
+    public function test_only_owner_or_super_admin_can_delete_organization_and_members_are_preserved(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $organization = Organization::factory()->create(['owner_id' => $owner->id]);
+        $organization->users()->attach([$owner->id, $member->id]);
+        $this->actingAs($member)->delete('/organizations/'.$organization->id)->assertForbidden();
+        $this->actingAs($owner)->withSession(['organization_id' => $organization->id])->delete('/organizations/'.$organization->id)->assertRedirect('/account')->assertSessionMissing('organization_id');
+        $this->assertDatabaseMissing('organizations', ['id' => $organization->id]);
+        $this->assertDatabaseHas('users', ['id' => $member->id]);
+    }
+
+    public function test_organization_deletion_requires_cancelled_stripe_subscription(): void
+    {
+        config(['accounts.stripe_secret' => 'sk_test']);
+        $owner = User::factory()->create();
+        $organization = Organization::factory()->create(['owner_id' => $owner->id, 'stripe_subscription_id' => 'sub_test']);
+        Http::fake(['api.stripe.com/*' => Http::response(['status' => 'active'])]);
+        $this->actingAs($owner)->from('/organizations/'.$organization->id)->delete('/organizations/'.$organization->id)->assertSessionHasErrors('organization');
+        $this->assertDatabaseHas('organizations', ['id' => $organization->id]);
+    }
+
+    public function test_editor_changes_are_shared_with_viewer_and_viewer_cannot_write(): void
+    {
+        $owner = User::factory()->create();
+        $editor = User::factory()->create();
+        $viewer = User::factory()->create();
+        $organization = Organization::factory()->create(['owner_id' => $owner->id, 'admin_provisioned' => true]);
+        $organization->users()->attach($editor->id, ['role' => 'editor']);
+        $organization->users()->attach($viewer->id, ['role' => 'viewer']);
+        $this->actingAs($editor)->putJson('/organizations/'.$organization->id.'/workspace', ['data' => ['safetyMessages' => ['en' => 'Test safety message'], 'actions' => [['id' => 'ACT-1', 'text' => 'Shared action']]], 'version' => 0])->assertOk();
+        $this->actingAs($viewer)->getJson('/organizations/'.$organization->id.'/workspace')->assertOk()->assertJsonPath('data.safetyMessages.en', 'Test safety message')->assertJsonPath('data.actions.0.text', 'Shared action');
+        $this->putJson('/organizations/'.$organization->id.'/workspace', ['data' => ['actions' => []], 'version' => 1])->assertForbidden();
+        $this->patch('/organizations/'.$organization->id.'/members/'.$viewer->id.'/role', ['role' => 'editor'])->assertForbidden();
+        $this->actingAs($owner)->patch('/organizations/'.$organization->id.'/members/'.$viewer->id.'/role', ['role' => 'editor'])->assertRedirect();
+        $this->assertTrue($organization->canEdit($viewer));
+        $this->actingAs(User::factory()->create())->getJson('/organizations/'.$organization->id.'/workspace')->assertForbidden();
+    }
+
+    public function test_user_cannot_join_or_create_a_second_organization(): void
+    {
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $first = Organization::factory()->create(['owner_id' => $owner->id, 'admin_provisioned' => true]);
+        $first->users()->attach([$owner->id, $member->id]);
+        $otherOwner = User::factory()->create();
+        $second = Organization::factory()->create(['owner_id' => $otherOwner->id, 'admin_provisioned' => true]);
+        $this->actingAs($otherOwner)->post('/organizations/'.$second->id.'/members', ['email' => $member->email])->assertSessionHasErrors('organization');
+        $this->actingAs($member)->post('/organizations', ['name' => 'Another company'])->assertSessionHasErrors('organization');
+        $this->assertSame(1, $member->organizations()->count());
+        $this->actingAs($this->admin())->post('/admin/organizations', ['name' => 'Admin-created second', 'owner_email' => $member->email])->assertSessionHasErrors('organization');
     }
 }

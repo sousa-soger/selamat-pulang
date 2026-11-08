@@ -2,10 +2,10 @@
 
 return [
     'dashboard' => ['Start here', 'Home', 'house'],
-    'personal' => ['Personal', 'Personal space', 'user'],
+    'learning' => ['Personal', 'Learning', 'book-open'],
     'workerportal' => ['Personal', 'Safety messages & reporting', 'qr-code'],
     'mentor' => ['Personal', 'Learning & guidance', 'lightbulb'],
-    'organization' => ['Organization', 'Organization overview', 'layout-dashboard'],
+    'organization' => ['Organization', 'Organization', 'layout-dashboard'],
     'next' => ['Organization', 'Organization priorities', 'list-checks'],
     'calendar' => ['Organization', 'Compliance calendar', 'calendar-days'],
     'workplace' => ['Set up the organization', 'Workplace profile', 'building-2'],

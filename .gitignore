@@ -44,3 +44,6 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Video production lives outside this application repository
+/adapt360-video/
